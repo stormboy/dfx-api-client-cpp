@@ -1,0 +1,9 @@
+{
+    "testMate.cpp.test.advancedExecutables": [
+        {
+            "pattern": "{cmake-build-,build,Build,BUILD,out,Out,OUT}*/**/*{test,Test,TEST}*"
+        }
+    ],
+    "cmake.configureOnOpen": false,
+    "cmake.configureArgs": ["-DCMAKE_TOOLCHAIN_FILE=${workspaceFolder}/cmake-build-${buildType}/conan/conan_toolchain.cmake"]
+}

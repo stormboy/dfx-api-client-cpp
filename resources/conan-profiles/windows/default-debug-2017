@@ -1,0 +1,6 @@
+include(default)
+
+[settings]
+compiler.version=15
+build_type=Debug
+

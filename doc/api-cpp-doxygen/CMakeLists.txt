@@ -1,0 +1,25 @@
+set(DOXYGEN_PROJECT_NAME CloudAPI)
+
+# Find all the public headers
+get_target_property(API_CPP_PUBLIC_HEADERS api-cpp PUBLIC_HEADER)
+
+set(PUBLIC_HEADERS ${API_CPP_PUBLIC_HEADERS})
+
+set(DOXYGEN_INPUT_DIR ${CMAKE_SOURCE_DIR}/api-cpp/include)
+set(DOXYGEN_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR})
+set(DOXYGEN_INDEX_FILE ${DOXYGEN_OUTPUT_DIR}/html/index.html)
+
+set(DOXYFILE_IN Doxyfile.in)
+set(DOXYFILE_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+configure_file(${DOXYFILE_IN} ${DOXYFILE_OUT} @ONLY)
+
+file(MAKE_DIRECTORY ${DOXYGEN_OUTPUT_DIR}) # Doxygen won't create this for us
+add_custom_command(
+  OUTPUT ${DOXYGEN_INDEX_FILE}
+  DEPENDS ${PUBLIC_HEADERS}
+  COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYFILE_OUT}
+  MAIN_DEPENDENCY ${DOXYFILE_OUT}
+  ${DOXYFILE_IN}
+  COMMENT "Generating ${DOXYGEN_PROJECT_NAME} docs")
+
+add_custom_target(doxygen-api-cpp ALL DEPENDS ${DOXYGEN_INDEX_FILE})

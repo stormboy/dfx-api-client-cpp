@@ -1,0 +1,15 @@
+{
+    "profiles": [
+        {
+            "name":"Conan_Debug",
+            "conanFile": "${workspaceFolder}/conanfile.py",
+            "profileBuild":"default-debug-2017",
+            "profileHost": "default-debug-2017",
+            "installArg": "--build missing --install-folder ${workspaceFolder}/cmake-build-${buildType}",
+            "buildArg":"",
+            "createUser": "conan",
+            "createChannel": "user",
+            "createArg":"--build=missing"
+        }
+    ]
+}

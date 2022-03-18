@@ -1,0 +1,8 @@
+{
+     global:
+	_ZN3dfx3api*;
+	_Z*3dfx3api*;
+     local:
+	*;
+};
+
