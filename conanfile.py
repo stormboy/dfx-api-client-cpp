@@ -64,7 +64,7 @@ class dfxcloud(ConanFile):
     scm = {
         "type": "git",
         "subfolder": name,
-        "url": "auto",
+        "url": url,
         "revision": "auto"
     }
 
@@ -111,9 +111,7 @@ class dfxcloud(ConanFile):
             del self.options.doc_language
 
     def source(self):
-        self.run("git clone {} {}".format(self.url, self.name))
-        self.run("cd {}".format(self.name))
-        self.run("git checkout tags/v{} -b v{}-branch".format(self.version, self.version))
+        self.run("git clone --depth 1 -b v{} {} {}".format(self.version, self.url, self.name))
 
     def build_requirements(self):
         # Nuralogix conan repository provided

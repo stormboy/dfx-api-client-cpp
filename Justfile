@@ -13,7 +13,7 @@ export c:="False"     # Assume clang-checks off
 _default:
     #!/usr/bin/env bash
     set -euo pipefail
-    if [ -z "MSYSTEM" ]; then
+    if [ -z "${MSYSTEM+x}" ]; then
       {{just_executable()}} -f {{justfile()}} --list --unsorted
     else
       justfile_exe=`cygpath "{{just_executable()}}"`
