@@ -1,11 +1,13 @@
-# Build Environment Setup
+# Building
+
+## Environment Setup
 
 This package relies on the dependency management from [Conan](https://conan.io/)
 and the [CMake](https://cmake.org/) build system. It needs *both* Conan and
 CMake to build the library, but can be built by either Conan or CMake. Deciding
 if Conan or CMake should build the library is related to how you will consume
-the library. You can also optionally install
-[Just](https://github.com/casey/just) to simplify some build steps.
+the library. We also recommend that you use
+[Just](https://github.com/casey/just) to automate the build steps.
 
 Conan is a tool for managing C++ dependencies and if you are writing an
 application which depends on this library and is using Conan already, it is
@@ -25,67 +27,88 @@ done by selecting a profile which sets up the appropriate CMake Tool Chain.
 Conan/CMake/Just installation is easiest done with a platform package manager,
 but can be done via source as well:
 
+### macOS (using https://brew.sh/)
+
 ```bash
-# macOS (using https://brew.sh/)
 brew install conan
 brew install cmake
 brew install just
-
-#############################################################
-
-# Windows (using https://scoop.sh/)
-scoop install conan
-scoop install cmake
-scoop install just
-
-#############################################################
-
-# Ubuntu
-mkdir development
-cd development
-python3 -m venv venv         # Create Python virtual environment
-source venv/bin/activate     # Activate virtual environment
-pip install conan
-
-# Install CMake via build (package manager not recent enough)
-sudo apt-get install build-essential libssl-dev
-wget https://github.com/Kitware/CMake/releases/download/v3.22.3/cmake-3.22.3.tar.gz
-tar -zxvf cmake-3.22.3.tar.gz
-cd cmake-3.22.3
-./bootstrap
-make
-sudo make install
-
-wget https://github.com/casey/just/releases/download/1.1.0/just-1.1.0-x86_64-unknown-linux-musl.tar.gz
-tar xvzf just-1.1.0-x86_64-unknown-linux-musl.tar.gz just
-sudo mv just /usr/local/bin
 ```
 
-## Configuring Conan
+### Windows (using https://scoop.sh/)
 
-To retrieve packages which are Nuralogix hosted you will need to setup the Conan
-remote,
+```bash
+scoop install conan   # OR choco install conan OR winget install conan
+scoop install cmake   # OR choco install cmake OR winget install cmake
+scoop install just    # OR manually download and place Just in your PATH
+```
+
+### Ubuntu
+
+```bash
+sudo apt-get install build-essential libssl-dev  # Ensure compilers and SSL libraries
+mkdir -p development && cd development # Replace `development` with you preferred directory
+python3 -m venv venv         # Create Python virtual environment
+source venv/bin/activate     # Activate virtual environment
+pip install conan            # Install Conan in the virtual environment
+pip install cmake            # Install CMake in the virtual environment
+wget https://github.com/casey/just/releases/download/1.1.0/just-1.1.0-x86_64-unknown-linux-musl.tar.gz
+tar xvzf just-1.1.0-x86_64-unknown-linux-musl.tar.gz just
+mv just ~/.local/bin        # Assuming ~/.local/bin is in PATH
+```
+
+## Configuring Conan to use the NuraLogix remote
+
+To retrieve packages which are hosted by NuraLogix you will need to add the
+following Conan remote,
 
 ```bash
 conan remote add nuralogix https://artifactory.na-east.nuralogix.ai/artifactory/api/conan/conan
 ```
 
-The most basic way to build is using standard Conan `install` syntax. Expect
-this to take a while and can be built for both Debug & Release targets.
+## Building with `Just`
+
+If you are using `Just` then it can perform all the subsequent steps for you.
+You will need to invoke it from a Unix shell with access to the compilers on
+your platform. (On Windows, this would be the Git Bash shell.)
 
 ```bash
-conan install dfxcloud/1.0.0@ --build missing -s build_type=Debug
-conan install dfxcloud/1.0.0@ --build missing -s build_type=Release
+just t=Release build  # Use t=Debug for a debug build
+```
+
+Expect this to take a while.
+
+If you don't want to use `Just`, you can follow the steps below, manually.
+
+---
+
+## Building with Conan and CMake
+
+### Installing dependencies using Conan
+
+The most basic way to install dependencies is using standard Conan `install`
+syntax. Expect this to take a while and can be built for both Debug & Release
+targets.
+
+```bash
+conan install . -pr:b=default -o dfxcloud:enable_checks=False -if build --build missing -s build_type=Debug
+conan install . -pr:b=default -o dfxcloud:enable_checks=False -if build --build missing -s build_type=Release
 ```
 
 This places the built artifact into the Conan cache (~/.conan/data) and may take
 a while if none of the upstream dependencies are available locally or from a
 Conan server as a pre-built package. Subsequent builds will be much faster,
-provided your dependency and option graphs remain consistent.
+provided your dependency and option graphs remain consistent. This also readies
+the `build` directory for the next step by placing the CMAKE_TOOLCHAIN_FILE
+in it, so switch to it.
 
-## CMake Generators
+```bash
+cd build
+```
 
-CMake offers a number of different
+### Configuring and building using CMake
+
+On Windows, CMake offers a number of different
 [cmake-generators](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html)
 which can be used to create Ninja build files, Xcode Projects or Visual Studio
 projects (VS 6 through VS 16 (2019)) from the CMakeLists.txt definitions.
@@ -93,15 +116,34 @@ projects (VS 6 through VS 16 (2019)) from the CMakeLists.txt definitions.
 For example, to create a Visual Studio 16 2019 for Win32, x64, ARM or ARM64 you
 would use one of the following and then open the generated solution files.
 
-```cmd
-cmake -G "Visual Studio 16 2019" -A Win32 ..
-
-cmake -G "Visual Studio 16 2019" -A x64 ..
-
-cmake -G "Visual Studio 16 2019" -A ARM ..
-
-cmake -G "Visual Studio 16 2019" -A ARM64 ..
+```bash
+cmake .. -DCMAKE_TOOLCHAIN_FILE=conan/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 16 2019" -A x64
 ```
+
+On non-Windows platforms:
+
+```bash
+cmake .. -DCMAKE_TOOLCHAIN_FILE=conan/conan_toolchain.cmake
+```
+
+Then you can build using,
+
+```bash
+cmake --build . --config Release
+
+# On Windows
+cmake --build . --config Release --target ALL_BUILD
+```
+
+### Build artifacts
+
+You can find the library that was built in `build/Release/`
+
+You can find some additional header files you will need in `build/include/`
+
+You can find some optional resources in `build/res/`
+
+You can use these in your own projects.
 
 ## Troubleshooting build issues
 
