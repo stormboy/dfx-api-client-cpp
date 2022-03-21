@@ -26,7 +26,7 @@ build:
     #!/usr/bin/env bash
     set -euo pipefail
     rm -rf "${BUILD_FOLDER}"
-    conan install . --build missing -if "${BUILD_FOLDER}" -o dfxcloud:enable_checks="$c" -s build_type="$t"
+    conan install . -pr:b=default --build missing -if "${BUILD_FOLDER}" -o dfxcloud:enable_checks="$c" -s build_type="$t"
     cd build
     if [ -z "${MSYSTEM+x}" ]; then
       cmake .. -DCMAKE_TOOLCHAIN_FILE=conan/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=$t
@@ -101,7 +101,7 @@ docs:
       exit 1
     fi
     rm -rf "${BUILD_FOLDER}"
-    conan install . --build missing -if "${BUILD_FOLDER}" -o dfxcloud:with_docs=True -s build_type="$t"
+    conan install . -pr:b=default --build missing -if "${BUILD_FOLDER}" -o dfxcloud:with_docs=True -s build_type="$t"
     cd build
     if [ -z "${MSYSTEM+x}" ]; then
       cmake .. -DCMAKE_TOOLCHAIN_FILE=conan/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=$t
@@ -115,7 +115,7 @@ docs:
 conan:
     #!/usr/bin/env bash
     set -euo pipefail
-    conan create . --build missing -o dfxcloud:enable_checks="$c"
+    conan create . -pr:b=default --build missing -o dfxcloud:enable_checks="$c"
 
 # Updates licenses using https://github.com/lsm-dev/license-header-checker
 update-license:
