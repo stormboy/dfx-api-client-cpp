@@ -35,7 +35,7 @@ void dfx::api::cloudLogSetEnabled(bool enabled)
 
 bool dfx::api::cloudLogIsActive(int logLevel)
 {
-    return true;
+    return cloudLogLevel() >= logLevel;
 }
 
 int dfx::api::cloudLogLevel()

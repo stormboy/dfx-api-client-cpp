@@ -3,7 +3,6 @@
 
 #include "dfx/auth/v1/auth.grpc.pb.h"
 #include "dfx/devices/v2/devices.grpc.pb.h"
-#include "dfx/measurements/v2/measurements.grpc.pb.h"
 
 #include "dfx/api/OrganizationAPI.hpp"
 

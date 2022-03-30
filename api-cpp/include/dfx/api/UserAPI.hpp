@@ -131,6 +131,33 @@ public:
 
     /**
      * \~english
+     * @brief Retrieve user information for the currently connected user.
+     *
+     * @param config provides all the cloud configuration settings
+     * @param user account information for current user
+     * @return status of operation, CLOUD_OK on SUCCESS
+     */
+    virtual CloudStatus retrieve(const CloudConfig& config, User& user);
+
+    /**
+     * \~english
+     * @brief Update the currently connected user.
+     *
+     * @param config provides all the cloud configuration settings
+     * @param user account details to update
+     * @return status of operation, CLOUD_OK on SUCCESS
+     *
+     * \~chinese
+     * @brief 更新用户
+     *
+     * @param config 服务配置参数
+     * @param user 用户信息
+     * @return 接口返回值 CLOUD_OK:成功
+     */
+    virtual CloudStatus update(const CloudConfig& config, const User& user);
+
+    /**
+     * \~english
      * @brief Retrieve a user from the server based on the userID and/or email.
      *
      * \verbatim embed:rst:leading-asterisk
@@ -175,7 +202,8 @@ public:
      * @param user 用户信息
      * @return 接口返回值 CLOUD_OK:成功
      */
-    virtual CloudStatus update(const CloudConfig& config, const User& user);
+    virtual CloudStatus
+    update(const CloudConfig& config, const std::string& userID, const std::string& email, const User& user);
 
     /**
      * \~english

@@ -3,8 +3,9 @@
 from conans import ConanFile, MSBuild, tools
 from conans.tools import os_info, SystemPackageTool
 from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps
+from conans.tools import load
 
-import os, sys, subprocess
+import os, sys, re, subprocess
 
 # https://stackoverflow.com/a/42580137
 def get_base_prefix_compat():
@@ -13,9 +14,18 @@ def get_base_prefix_compat():
 def in_virtualenv():
     return get_base_prefix_compat() != sys.prefix
 
+def get_version():
+    try:
+        content = load("CMakeLists.txt")
+        version = re.search("set\(DFX_CLOUD_LIBRARY_VERSION (.*)\)", content).group(1)
+        return version.strip()
+    except Exception as e:
+        print("Exception obtaining version: {}".format(e))
+        return None
+
 class dfxcloud(ConanFile):
     name = "dfxcloud"
-    version = "1.0.0"
+    version = get_version()
     license = "Nuralogix License"
     url = "https://github.com/nuralogix/dfx-api-client-cpp"
     description = "The DFX API facilitates data communication with a DFX Server"
@@ -237,8 +247,8 @@ class dfxcloud(ConanFile):
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
 
-        # Generate dfxcloud-config.cmake
-        self.cpp_info.set_property("cmake_file_name", "dfxcloud")
+        # Generate DFXCloud-config.cmake
+        self.cpp_info.set_property("cmake_file_name", "DFXCloud")
 
         # DFXCloud:: namespace for the targets
         self.cpp_info.set_property("cmake_target_name", "DFXCloud")

@@ -14,6 +14,9 @@ class UserGetCommand : public DFXAppCommand
 public:
     UserGetCommand(CLI::App* get, std::shared_ptr<Options> options, DFXExitCode& result);
     DFXExitCode execute() override;
+
+private:
+    bool operateOnSelf;
 };
 
 #endif // DFXAPI_USERCOMMAND_HPP

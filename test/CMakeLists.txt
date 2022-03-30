@@ -1,8 +1,24 @@
-if(NOT WITH_TESTS)
-  return()
-endif()
+cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
+project(test-cloud-api LANGUAGES CXX C)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 
 # https://grpc.github.io/grpc/cpp/md_doc_unit_testing.html
+
+find_package(GTest CONFIG REQUIRED)
+find_package(gflags CONFIG REQUIRED)
+
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+  find_package(DFXCloud CONFIG REQUIRED)
+  find_package(nlohmann_json CONFIG REQUIRED) # Dependency of DFXCloud
+endif()
+
+include(CTest)
+include(GoogleTest)
+enable_testing()
 
 add_executable(
   test-cloud-api
@@ -31,7 +47,7 @@ endif(MSVC)
 # set_target_properties(test-cloud-api PROPERTIES CXX_VISIBILITY_PRESET default)
 # set_target_properties(test-cloud-api PROPERTIES CMAKE_VISIBILITY_INLINES_HIDDEN NO)
 # target_compile_definitions(test-cloud-api PUBLIC GTEST_API_=)
-target_link_libraries(test-cloud-api PRIVATE dfxapi gtest::gtest gflags::gflags)
+target_link_libraries(test-cloud-api PRIVATE DFXCloud::dfxcloud gtest::gtest gflags::gflags fmt::fmt)
 
 target_include_directories(test-cloud-api PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
@@ -43,7 +59,7 @@ elseif(WIN32)
   add_custom_command(
     TARGET test-cloud-api
     POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:dfxapi> $<TARGET_FILE_DIR:test-cloud-api>)
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:dfxcloud> $<TARGET_FILE_DIR:test-cloud-api>)
 else()
   set_target_properties(test-cloud-api PROPERTIES INSTALL_RPATH "\$ORIGIN/../lib")
 endif()

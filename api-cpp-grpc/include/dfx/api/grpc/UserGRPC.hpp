@@ -44,10 +44,15 @@ public:
                      std::vector<User>& users,
                      int16_t& totalCount) override;
 
+    CloudStatus retrieve(const CloudConfig& config, User& user) override;
+
+    CloudStatus update(const CloudConfig& config, const User& user) override;
+
     CloudStatus
     retrieve(const CloudConfig& config, const std::string& userID, const std::string& email, User& user) override;
 
-    CloudStatus update(const CloudConfig& config, const User& user) override;
+    CloudStatus
+    update(const CloudConfig& config, const std::string& userID, const std::string& email, const User& user) override;
 
     CloudStatus remove(const CloudConfig& config, const std::string& userID, const std::string& email) override;
 

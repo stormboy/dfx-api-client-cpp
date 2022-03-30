@@ -73,7 +73,17 @@ You will need to invoke it from a Unix shell with access to the compilers on
 your platform. (On Windows, this would be the Git Bash shell.)
 
 ```bash
-just t=Release build  # Use t=Debug for a debug build
+just build       # Build library (default type=Debug)
+
+just             # Display help list of defaults/options
+
+just type=Release build    # Build a Release build
+just release     # Short cut for type=Release
+
+just version     # Display current library version
+just -s version  # Show steps in version recipe
+
+just shared=False type=Release build  # Build a static, release library
 ```
 
 Expect this to take a while.

@@ -26,7 +26,6 @@ add_library(
 if(MSVC AND CMAKE_CXX_STANDARD GREATER_EQUAL 17)
   target_compile_definitions(api-protos-grpc
                              PUBLIC "-D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING")
-  # target_compile_options(api-protos-grpc PUBLIC /wd4244 /wd4267 /wd4996)
   target_compile_options(api-protos-grpc PUBLIC /utf-8)
 else()
   # Ignore Protobuf password deprecations warning: 'password' is deprecated [-Wdeprecated-declarations]

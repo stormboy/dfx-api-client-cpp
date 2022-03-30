@@ -30,13 +30,24 @@ CloudStatus UserAPI::list(const CloudConfig& config,
     return CloudStatus(CLOUD_UNIMPLEMENTED_FEATURE);
 }
 
+CloudStatus UserAPI::retrieve(const CloudConfig& config, User& user)
+{
+    return CloudStatus(CLOUD_UNIMPLEMENTED_FEATURE);
+}
+
+CloudStatus UserAPI::update(const CloudConfig& config, const User& user)
+{
+    return CloudStatus(CLOUD_UNIMPLEMENTED_FEATURE);
+}
+
 CloudStatus
 UserAPI::retrieve(const CloudConfig& config, const std::string& userID, const std::string& email, User& user)
 {
     return CloudStatus(CLOUD_UNIMPLEMENTED_FEATURE);
 }
 
-CloudStatus UserAPI::update(const CloudConfig& config, const User& user)
+CloudStatus
+UserAPI::update(const CloudConfig& config, const std::string& userID, const std::string& email, const User& user)
 {
     return CloudStatus(CLOUD_UNIMPLEMENTED_FEATURE);
 }

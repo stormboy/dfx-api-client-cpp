@@ -10,6 +10,7 @@
 #include "dfx/users/v2/users.pb.h"
 
 #include "CloudGRPCMacros.hpp"
+#include <ctime>
 #include <fmt/format.h>
 
 using dfx::api::CloudAPI;
@@ -20,6 +21,26 @@ using dfx::api::UserAPI;
 
 using namespace dfx::api::grpc;
 using namespace ::grpc;
+
+// Helpers for Birth Date which in gRPC is a EPOCH time, but WebSocket/REST is a %F string.
+// Internally, Cloud API treats birth date as a string.
+std::string epocToString(uint64_t when)
+{
+    time_t epochtime = when;
+    struct tm date;
+    date = *std::localtime(&epochtime);
+    char buffer[256];
+    strftime(buffer, sizeof(buffer), "%F", &date); // %F = Short YYYY-MM-DD, equivalent to %Y-%m-%d  2001-08-23
+    return std::string(buffer);
+}
+
+uint64_t strToEpoch(const std::string& str)
+{
+    std::tm tmTime;
+    memset(&tmTime, 0, sizeof(tmTime));
+    strptime(str.c_str(), "%F", &tmTime);
+    return mktime(&tmTime);
+}
 
 UserGRPC::UserGRPC(const CloudConfig& config, const std::shared_ptr<CloudGRPC>& cloudGRPC)
 {
@@ -114,6 +135,65 @@ CloudStatus UserGRPC::list(const CloudConfig& config,
     return CloudStatus(CLOUD_OK);
 }
 
+CloudStatus UserGRPC::retrieve(const CloudConfig& config, User& user)
+{
+    DFX_CLOUD_VALIDATOR_MACRO(UserValidator, retrieve(config, user));
+
+    dfx::users::v2::RetrieveResponse response;
+    dfx::users::v2::RetrieveRequest request;
+
+    ClientContext context;
+    CloudGRPC::initializeClientContext(config, context, config.authToken);
+
+    MACRO_RETURN_ERROR_IF_GRPC_STATUS_NOT_OK(grpcUserStub->Retrieve(&context, request, &response));
+
+    if (response.has_user()) {
+        const auto& userData = response.user();
+
+        user.id = userData.id();
+        user.firstName = userData.first_name();
+        user.lastName = userData.last_name();
+        user.email = userData.email();
+        user.status = static_cast<UserStatus>(userData.status());
+        user.gender = userData.gender();
+        user.heightCM = userData.height_cm();
+        user.weightKG = userData.weight_kg();
+        user.avatarURL = userData.avatar_uri();
+        user.createdEpochSeconds = userData.created().seconds();
+        user.updatedEpochSeconds = userData.updated().seconds();
+        user.dateOfBirth = epocToString(userData.date_of_birth().seconds());
+    }
+
+    return CloudStatus(CLOUD_OK);
+}
+
+CloudStatus UserGRPC::update(const CloudConfig& config, const User& user)
+{
+    DFX_CLOUD_VALIDATOR_MACRO(UserValidator, update(config, user));
+
+    dfx::users::v2::UpdateResponse response;
+    dfx::users::v2::UpdateRequest request;
+    request.set_id(user.id);
+    request.set_first_name(user.firstName);
+    request.set_last_name(user.lastName);
+    request.set_email(user.email);
+    request.set_role(user.role);
+    request.set_password(user.password);
+    request.set_height_cm(user.heightCM);
+    request.set_weight_kg(user.weightKG);
+    request.set_gender(user.gender);
+    request.set_status(static_cast<dfx::users::v2::Status>(user.status));
+    request.set_avatar_uri(user.avatarURL);
+    request.mutable_date_of_birth()->set_seconds(static_cast<::google::protobuf::int64>(strToEpoch(user.dateOfBirth)));
+
+    ClientContext context;
+    CloudGRPC::initializeClientContext(config, context, config.authToken);
+
+    MACRO_RETURN_ERROR_IF_GRPC_STATUS_NOT_OK(grpcUserStub->Update(&context, request, &response));
+
+    return CloudStatus(CLOUD_OK);
+}
+
 CloudStatus
 UserGRPC::retrieve(const CloudConfig& config, const std::string& userID, const std::string& email, User& user)
 {
@@ -148,16 +228,17 @@ UserGRPC::retrieve(const CloudConfig& config, const std::string& userID, const s
     return CloudStatus(CLOUD_OK);
 }
 
-CloudStatus UserGRPC::update(const CloudConfig& config, const User& user)
+CloudStatus
+UserGRPC::update(const CloudConfig& config, const std::string& userID, const std::string& email, const User& user)
 {
-    DFX_CLOUD_VALIDATOR_MACRO(UserValidator, update(config, user));
+    DFX_CLOUD_VALIDATOR_MACRO(UserValidator, update(config, userID, email, user));
 
     dfx::users::v2::UpdateResponse response;
     dfx::users::v2::UpdateRequest request;
-    request.set_id(user.id);
+    request.set_id(userID);
+    request.set_email(email);
     request.set_first_name(user.firstName);
     request.set_last_name(user.lastName);
-    request.set_email(user.email);
     request.set_role(user.role);
     request.set_password(user.password);
     request.set_height_cm(user.heightCM);
@@ -165,7 +246,7 @@ CloudStatus UserGRPC::update(const CloudConfig& config, const User& user)
     request.set_gender(user.gender);
     request.set_status(static_cast<dfx::users::v2::Status>(user.status));
     request.set_avatar_uri(user.avatarURL);
-    request.mutable_date_of_birth()->set_seconds(static_cast<::google::protobuf::int64>(user.dateOfBirthEpochSeconds));
+    request.mutable_date_of_birth()->set_seconds(static_cast<::google::protobuf::int64>(strToEpoch(user.dateOfBirth)));
 
     ClientContext context;
     CloudGRPC::initializeClientContext(config, context, config.authToken);

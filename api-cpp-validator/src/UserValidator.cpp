@@ -45,6 +45,18 @@ CloudStatus UserValidator::list(const CloudConfig& config,
     return CloudStatus(CLOUD_OK);
 }
 
+CloudStatus UserValidator::retrieve(const CloudConfig& config, User& user)
+{
+    MACRO_RETURN_ERROR_IF_NO_USER_TOKEN(config);
+    return CloudStatus(CLOUD_OK);
+}
+
+CloudStatus UserValidator::update(const CloudConfig& config, const User& user)
+{
+    MACRO_RETURN_ERROR_IF_NO_USER_TOKEN(config);
+    return CloudStatus(CLOUD_OK);
+}
+
 CloudStatus
 UserValidator::retrieve(const CloudConfig& config, const std::string& userID, const std::string& email, User& user)
 {
@@ -54,9 +66,12 @@ UserValidator::retrieve(const CloudConfig& config, const std::string& userID, co
     return CloudStatus(CLOUD_OK);
 }
 
-CloudStatus UserValidator::update(const CloudConfig& config, const User& user)
+CloudStatus
+UserValidator::update(const CloudConfig& config, const std::string& userID, const std::string& email, const User& user)
 {
     MACRO_RETURN_ERROR_IF_NO_USER_TOKEN(config);
+    MACRO_RETURN_ERROR_IF_EMPTY(userID);
+    MACRO_RETURN_ERROR_IF_EMPTY(email);
     return CloudStatus(CLOUD_OK);
 }
 

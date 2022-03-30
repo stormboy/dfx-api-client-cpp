@@ -92,6 +92,55 @@ CloudStatus UserWebSocket::list(const CloudConfig& config,
     return status;
 }
 
+CloudStatus UserWebSocket::retrieve(const CloudConfig& config, User& user)
+{
+    DFX_CLOUD_VALIDATOR_MACRO(UserValidator, retrieve(config, user));
+    dfx::proto::users::RetrieveRequest request;
+    dfx::proto::users::RetrieveResponse response;
+
+    auto status = cloudWebSocket->sendMessage(dfx::api::web::Users::Retrieve, request, response);
+    if (status.OK()) {
+        user.id = response.id();
+        user.firstName = response.firstname();
+        user.lastName = response.lastname();
+        user.email = response.email();
+        user.gender = response.gender();
+        user.dateOfBirth = response.dateofbirth();
+        user.avatarURL = response.avataruri();
+        user.createdEpochSeconds = response.created();
+        user.updatedEpochSeconds = response.updated();
+        user.role = response.roleid();
+        user.phoneNumber = response.phonenumber();
+        user.isVerified = response.isverified();
+        user.verificationCode = response.verificationcode();
+        user.heightCM = response.heightcm();
+        user.weightKG = response.weightkg();
+        user.loginMethod = response.loginmethod();
+        user.ssoID = response.ssoid();
+    }
+    return status;
+}
+
+CloudStatus UserWebSocket::update(const CloudConfig& config, const User& user)
+{
+    DFX_CLOUD_VALIDATOR_MACRO(UserValidator, update(config, user));
+    dfx::proto::users::UpdateRequest request;
+    dfx::proto::users::UpdateResponse response;
+
+    request.set_email(user.email);
+    request.set_firstname(user.firstName);
+    request.set_lastname(user.lastName);
+    request.set_password(user.password);
+    request.set_gender(user.gender);
+    request.set_dateofbirth(user.dateOfBirth);
+    request.set_phonenumber(user.phoneNumber);
+    request.set_heightcm(user.heightCM);
+    request.set_weightkg(user.weightKG);
+
+    auto status = cloudWebSocket->sendMessage(dfx::api::web::Users::Update, request, response);
+    return status;
+}
+
 CloudStatus
 UserWebSocket::retrieve(const CloudConfig& config, const std::string& userID, const std::string& email, User& user)
 {
@@ -122,9 +171,10 @@ UserWebSocket::retrieve(const CloudConfig& config, const std::string& userID, co
     return status;
 }
 
-CloudStatus UserWebSocket::update(const CloudConfig& config, const User& user)
+CloudStatus
+UserWebSocket::update(const CloudConfig& config, const std::string& userID, const std::string& email, const User& user)
 {
-    DFX_CLOUD_VALIDATOR_MACRO(UserValidator, update(config, user));
+    DFX_CLOUD_VALIDATOR_MACRO(UserValidator, update(config, userID, email, user));
     dfx::proto::users::UpdateRequest request;
     dfx::proto::users::UpdateResponse response;
 

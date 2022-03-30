@@ -29,16 +29,6 @@ if(WITH_WEBSOCKET)
   find_package(Libwebsockets CONFIG REQUIRED) # Libwebsockets::libwebsockets
 endif(WITH_WEBSOCKET)
 
-if(WITH_TESTS)
-  find_package(GTest CONFIG REQUIRED)
-  find_package(gflags CONFIG REQUIRED)
-endif(WITH_TESTS)
-
-if(WITH_DFXCLI)
-  find_package(CLI11 CONFIG REQUIRED)
-  find_package(naturalsort CONFIG REQUIRED)
-endif()
-
 # Handles importing files from the PACKAGE_FOLDERS, analogous to ConanFile::imports() stage. Since the conan
 # imports() is broken for private requirements when using build contexts they are written here.
 #

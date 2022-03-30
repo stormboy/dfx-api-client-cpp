@@ -74,13 +74,11 @@ CloudStatus UserREST::list(const CloudConfig& config,
     return CloudStatus(CLOUD_UNSUPPORTED_FEATURE, fmt::format("{} does not support {} end-point", "REST", "user list"));
 }
 
-CloudStatus
-UserREST::retrieve(const CloudConfig& config, const std::string& userID, const std::string& email, User& user)
+CloudStatus UserREST::retrieve(const CloudConfig& config, User& user)
 {
-    DFX_CLOUD_VALIDATOR_MACRO(UserValidator, retrieve(config, userID, email, user));
+    DFX_CLOUD_VALIDATOR_MACRO(UserValidator, retrieve(config, user));
     json response, request;
-    auto status = CloudREST::performRESTCall(
-        config, web::Organizations::RetrieveUser, config.authToken, {userID}, request, response);
+    auto status = CloudREST::performRESTCall(config, web::Users::Retrieve, config.authToken, {}, request, response);
     if (status.OK()) {
         user = response;
     }
@@ -91,6 +89,34 @@ UserREST::retrieve(const CloudConfig& config, const std::string& userID, const s
 CloudStatus UserREST::update(const CloudConfig& config, const User& user)
 {
     DFX_CLOUD_VALIDATOR_MACRO(UserValidator, update(config, user));
+
+    json response, request;
+    request = user;
+    auto status = CloudREST::performRESTCall(config, web::Users::Update, config.authToken, {}, request, response);
+
+    return status;
+}
+
+CloudStatus
+UserREST::retrieve(const CloudConfig& config, const std::string& userID, const std::string& email, User& user)
+{
+    // Ignore email check for empty, REST call is going to ignore it anyway
+    DFX_CLOUD_VALIDATOR_MACRO(UserValidator, retrieve(config, userID, "email", user));
+    json response, request;
+    auto status = CloudREST::performRESTCall(
+        config, web::Organizations::RetrieveUser, config.authToken, {userID}, request, response);
+    if (status.OK()) {
+        user = response;
+    }
+
+    return status;
+}
+
+CloudStatus
+UserREST::update(const CloudConfig& config, const std::string& userID, const std::string& email, const User& user)
+{
+    // Ignore email check for empty, REST call is going to ignore it anyway
+    DFX_CLOUD_VALIDATOR_MACRO(UserValidator, update(config, userID, "email", user));
 
     json response, request;
     request = user;
