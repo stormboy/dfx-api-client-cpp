@@ -47,7 +47,7 @@ void dfx::api::cloudLogSetLevel(int logLevel)
 {
     loggingLevel = logLevel;
 
-#ifdef WITH_GRPC
+ #if defined(WITH_GRPC) && !defined(_WIN32)
     switch (logLevel) {
         case CLOUD_LOG_LEVEL_NONE:
             unsetenv(GRPC_VERBOSITY.c_str());
