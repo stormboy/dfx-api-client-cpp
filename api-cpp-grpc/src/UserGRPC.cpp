@@ -12,6 +12,8 @@
 #include "CloudGRPCMacros.hpp"
 #include <ctime>
 #include <fmt/format.h>
+#include <sstream>
+#include <iomanip>
 
 using dfx::api::CloudAPI;
 using dfx::api::CloudConfig;
@@ -36,9 +38,9 @@ std::string epocToString(uint64_t when)
 
 uint64_t strToEpoch(const std::string& str)
 {
-    std::tm tmTime;
-    memset(&tmTime, 0, sizeof(tmTime));
-    strptime(str.c_str(), "%F", &tmTime);
+    std::tm tmTime = {};
+    std::istringstream ss(str);
+    ss >> std::get_time(&tmTime, "%Y-%m-%d");
     return mktime(&tmTime);
 }
 
@@ -223,6 +225,7 @@ UserGRPC::retrieve(const CloudConfig& config, const std::string& userID, const s
         user.avatarURL = userData.avatar_uri();
         user.createdEpochSeconds = userData.created().seconds();
         user.updatedEpochSeconds = userData.updated().seconds();
+        user.dateOfBirth = epocToString(userData.date_of_birth().seconds());
     }
 
     return CloudStatus(CLOUD_OK);
