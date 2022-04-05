@@ -89,6 +89,7 @@ target_link_libraries(
   api-cpp
   PUBLIC nlohmann_json::nlohmann_json api-cpp-types
   PRIVATE $<BUILD_INTERFACE:api-utils>
+          $<BUILD_INTERFACE:$<$<BOOL:${WITH_CURL}>:CURL::libcurl>>
           $<BUILD_INTERFACE:$<$<BOOL:${WITH_YAML}>:yaml-cpp::yaml-cpp>>
           $<BUILD_INTERFACE:$<$<BOOL:${WITH_GRPC}>:api-cpp-grpc>>
           $<BUILD_INTERFACE:$<$<BOOL:${WITH_REST}>:api-cpp-rest>>

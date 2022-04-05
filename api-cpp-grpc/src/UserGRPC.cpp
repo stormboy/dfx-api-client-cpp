@@ -12,8 +12,8 @@
 #include "CloudGRPCMacros.hpp"
 #include <ctime>
 #include <fmt/format.h>
-#include <sstream>
 #include <iomanip>
+#include <sstream>
 
 using dfx::api::CloudAPI;
 using dfx::api::CloudConfig;
