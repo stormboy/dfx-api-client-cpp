@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.1.1]
+ - Updated protobuf version to resolve grpc protobuf conflict
+ - Updated CMake minimimum required format to the latest 3.23.1
+
 ## [1.1.0]
  - Added User support for retrieve/update operating on self when the
    id and email are not provided. When id and email are provided, the
