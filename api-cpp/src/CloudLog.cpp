@@ -35,7 +35,7 @@ void dfx::api::cloudLogSetEnabled(bool enabled)
 
 bool dfx::api::cloudLogIsActive(int logLevel)
 {
-    return true;
+    return cloudLogLevel() >= logLevel;
 }
 
 int dfx::api::cloudLogLevel()
@@ -47,7 +47,7 @@ void dfx::api::cloudLogSetLevel(int logLevel)
 {
     loggingLevel = logLevel;
 
- #if defined(WITH_GRPC) && !defined(_WIN32)
+#if defined(WITH_GRPC) && !defined(_WIN32)
     switch (logLevel) {
         case CLOUD_LOG_LEVEL_NONE:
             unsetenv(GRPC_VERBOSITY.c_str());

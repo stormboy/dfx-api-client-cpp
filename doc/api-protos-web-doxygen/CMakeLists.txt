@@ -9,8 +9,8 @@ set(DOXYGEN_INDEX_FILE ${DOXYGEN_OUTPUT_DIR}/html/index.html)
 set(DOXYFILE_IN Doxyfile.in)
 set(DOXYFILE_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 
-# These are injected via conan package protomatlabdoxygen which establishes the CMAKE_PROGRAM_PATH
-# which find_program uses to locate the binary. They are then substituted in the configure_file.
+# These are injected via conan package protomatlabdoxygen which establishes the CMAKE_PROGRAM_PATH which
+# find_program uses to locate the binary. They are then substituted in the configure_file.
 find_program(PROTO2CPP_BINPATH proto2cpp.py)
 find_program(M2CPP_BINPATH m2cpp.pl)
 

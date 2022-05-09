@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
+
+# conanfile.py parses next line to determine version which feeds the version to everything
+set(DFX_CLOUD_LIBRARY_VERSION 1.1.0)
+
 project(
-  dfxapi
-  VERSION 1.3
+  dfxcloud
+  VERSION ${DFX_CLOUD_LIBRARY_VERSION}
   LANGUAGES CXX C)
 
 # Using (at least) C++11 Features: using to write type aliases like typedefs Using (at least) C++17 Features:
@@ -99,6 +103,14 @@ list(PREPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_BINARY_DIR}/cma
                                                                                    # Conan (for proto gen)
 )
 
+if(DEFINED CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  message(STATUS "CMAKE_INSTALL_PREFIX is not set\n" "Default value: ${CMAKE_INSTALL_PREFIX}\n"
+                 "Will set it to ${CMAKE_BINARY_DIR}/install")
+  set(CMAKE_INSTALL_PREFIX
+      "${CMAKE_BINARY_DIR}/install"
+      CACHE PATH "Where the library will be installed to" FORCE)
+endif()
+
 include(find_dependencies)
 
 if(EMBED_CA_CERTS)
@@ -112,12 +124,6 @@ endif(BUILD_SHARED_LIBS)
 # GNUInstallDirs to install libraries into correct locations on all platform
 include(GNUInstallDirs)
 
-if(WITH_TESTS)
-  include(CTest)
-  include(GoogleTest)
-  enable_testing()
-endif()
-
 add_subdirectory(api-utils)
 add_subdirectory(api-protos-web)
 add_subdirectory(api-protos-grpc)
@@ -128,35 +134,40 @@ add_subdirectory(api-cpp-rest)
 add_subdirectory(websocket) # Provide an implementation for api-cpp-websockets to use
 add_subdirectory(api-cpp-websocket)
 add_subdirectory(doc)
-add_subdirectory(test)
-add_subdirectory(tool-dfxcli)
 
-add_library(dfxapi api-protos-grpc api-cpp api-utils $<$<BOOL:${WITH_GRPC}>:api-cpp-grpc>
-                   $<$<BOOL:${WITH_REST}>:api-cpp-rest> $<$<BOOL:${WITH_WEBSOCKET}>:api-cpp-websocket>)
+add_library(dfxcloud "")
+add_library(DFXCloud::dfxcloud ALIAS dfxcloud)
+
+if(WITH_DFXCLI)
+  add_subdirectory(tool-dfxcli)
+endif(WITH_DFXCLI)
+
+if(WITH_TESTS)
+  add_subdirectory(test)
+endif(WITH_TESTS)
 
 if(MSVC AND CMAKE_BUILD_TYPE MATCHES DEBUG) # Microsoft compiler flag
   # LNK4099 PDB 'filename' was not found with 'object/library' or at 'path'; linking object as if no debug
   # info
-  target_compile_options(dfxapi PUBLIC /wd4099)
-  set_target_properties(dfxapi PROPERTIES LINK_FLAGS "/ignore:4099")
+  target_compile_options(dfxcloud PUBLIC /wd4099)
+  set_target_properties(dfxcloud PROPERTIES LINK_FLAGS "/ignore:4099")
 endif(MSVC AND CMAKE_BUILD_TYPE MATCHES DEBUG)
 
 target_link_libraries(
-  dfxapi
+  dfxcloud
   PUBLIC api-cpp api-utils
-  PRIVATE $<$<BOOL:${WITH_GRPC}>:api-protos-grpc>
-          api-protos-web
-          api-cpp-validator # stub if not WITH_VALIDATORS
-          protobuf::protobuf
-          $<$<BOOL:${WITH_GRPC}>:api-cpp-grpc>
-          $<$<BOOL:${WITH_REST}>:api-cpp-rest>
-          $<$<BOOL:${WITH_WEBSOCKET}>:api-cpp-websocket>
-          $<$<BOOL:${WITH_WEBSOCKET}>:websocket>)
+  PRIVATE protobuf::protobuf
+          $<TARGET_OBJECTS:api-protos-web>
+          $<$<BOOL:${WITH_GRPC}>:$<TARGET_OBJECTS:api-protos-grpc>>
+          $<$<BOOL:${WITH_GRPC}>:$<TARGET_OBJECTS:api-cpp-grpc>>
+          $<$<BOOL:${WITH_REST}>:$<TARGET_OBJECTS:api-cpp-rest>>
+          $<$<BOOL:${WITH_WEBSOCKET}>:$<TARGET_OBJECTS:api-cpp-websocket>>
+          $<$<BOOL:${WITH_WEBSOCKET}>:$<TARGET_OBJECTS:websocket>>)
 
 # When not including gRPC, Undefined symbols for architecture arm64: "_CFRelease", referenced from:
 # _Curl_resolv in libcurl.a(libcurl_la-hostip.o)
 if(APPLE)
-  target_link_libraries(dfxapi PRIVATE "-framework CoreFoundation")
+  target_link_libraries(dfxcloud PRIVATE "-framework CoreFoundation")
 endif()
 
 if(APPLE)
@@ -186,46 +197,66 @@ else()
 endif()
 
 if(APPLE)
-  set_target_properties(dfxapi PROPERTIES INSTALL_RPATH "@executable_path/../lib")
+  set_target_properties(dfxcloud PROPERTIES INSTALL_RPATH "@executable_path/../lib")
 elseif(WIN32)
   # NO @RPATH on Windows
 else()
-  set_target_properties(dfxapi PROPERTIES INSTALL_RPATH "\$ORIGIN/../lib")
+  set_target_properties(dfxcloud PROPERTIES INSTALL_RPATH "\$ORIGIN/../lib")
 endif()
 
 if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
   if(NOT EMSCRIPTEN)
     if(APPLE)
       set_target_properties(
-        dfxapi PROPERTIES LINK_FLAGS
-                          "-Wl,-exported_symbols_list,${CMAKE_CURRENT_SOURCE_DIR}/cmake/clang-exports")
+        dfxcloud PROPERTIES LINK_FLAGS
+                            "-Wl,-exported_symbols_list,${CMAKE_CURRENT_SOURCE_DIR}/cmake/clang-exports")
     elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
       set_target_properties(
-        dfxapi PROPERTIES LINK_FLAGS "-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/cmake/gcc-exports")
+        dfxcloud PROPERTIES LINK_FLAGS "-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/cmake/gcc-exports")
     endif()
   endif()
 
   if(CMAKE_STRIP AND NOT EMSCRIPTEN)
     if(UNIX) # Same for both OSX and Linux
       add_custom_command(
-        TARGET dfxapi
+        TARGET dfxcloud
         POST_BUILD
-        COMMAND ${CMAKE_STRIP} -x $<TARGET_FILE:dfxapi>)
+        COMMAND ${CMAKE_STRIP} -x $<TARGET_FILE:dfxcloud>)
     endif()
   endif()
 endif()
 
+# This will not work on Windows if generated against an object library as there is implicit CMake defines
+# being injected for the real library being generated, in this case dfxcloud.
+include(GenerateExportHeader)
+generate_export_header(dfxcloud BASE_NAME DFXCLOUD EXPORT_FILE_NAME include/dfx/api/CloudAPI_Export.hpp)
+add_definitions(-Ddfxcloud_EXPORTS)
+
 install(
-  TARGETS dfxapi
+  TARGETS dfxcloud
+  EXPORT DFXCloud-export
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}) # This is for Windows
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  PUBLIC_HEADER DESTINATION include-bad/)
 
-# This will not work on Windows if generated against an object library as there is implicit CMake defines
-# being injected for the real library being generated, in this case dfxapi.
-include(GenerateExportHeader)
-generate_export_header(dfxapi BASE_NAME DFXCLOUD EXPORT_FILE_NAME include/dfx/api/CloudAPI_Export.hpp)
-add_definitions(-Ddfxapi_EXPORTS)
+install(
+  EXPORT DFXCloud-export
+  FILE DFXCloudTargets.cmake
+  NAMESPACE DFXCloud::
+  DESTINATION lib/cmake/DFXCloud)
+
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DFXCloudConfig.cmake DESTINATION "lib/cmake/DFXCloud")
+
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/include/dfx/api/CloudAPI_Export.hpp" DESTINATION include/dfx/api)
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+  ${CMAKE_CURRENT_BINARY_DIR}/cmake/DFXCloudConfigVersion.cmake
+  VERSION ${PROJECT_VERSION}
+  COMPATIBILITY SameMajorVersion)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cmake/DFXCloudConfigVersion.cmake DESTINATION "lib/cmake/DFXCloud")
 
 if(ENABLE_CHECKS)
   include(cmake/clang-tidy.cmake)
@@ -244,6 +275,7 @@ message(STATUS "")
 message(STATUS "    Target Host:  ${CMAKE_SYSTEM_NAME}, Arch: ${CMAKE_SYSTEM_PROCESSOR}")
 message(STATUS "    CXX COMPILER: ${CMAKE_CXX_COMPILER}    (${CMAKE_CXX_COMPILER_VERSION})")
 message(STATUS "    CMAKE_TOOLCHAIN_FILE: ${CMAKE_TOOLCHAIN_FILE}")
+message(STATUS "    CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "")
 message(STATUS "    BUILD_TYPE=${CMAKE_BUILD_TYPE}")
 message(STATUS "    SHARED_LIBS=${BUILD_SHARED_LIBS}")
@@ -262,7 +294,7 @@ message(STATUS "")
 message(STATUS "    EMBED_CA_CERTS=${EMBED_CA_CERTS}")
 message(STATUS "")
 
-set(CMAKE_DUMP_PROPS ON)
+set(CMAKE_DUMP_PROPS OFF)
 if(CMAKE_DUMP_PROPS)
   get_cmake_property(_variableNames VARIABLES)
   foreach(_variableName ${_variableNames})

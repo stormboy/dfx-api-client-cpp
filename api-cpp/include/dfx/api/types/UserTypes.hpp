@@ -37,7 +37,6 @@ using User = struct User
     uint16_t heightCM;
     uint16_t weightKG;
     std::string avatarURL;
-    uint64_t dateOfBirthEpochSeconds;
     uint64_t createdEpochSeconds;
     uint64_t updatedEpochSeconds;
     std::string password;

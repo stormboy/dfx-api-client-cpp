@@ -52,7 +52,7 @@ void dfx::api::to_json(nlohmann::json& j, const User& u)
     setJSONFieldIfNotDefault(j, "HeightCM", u.heightCM);
     setJSONFieldIfNotDefault(j, "WeightKG", u.weightKG);
     setJSONFieldIfNotDefault(j, "AvatarURL", u.avatarURL);
-    setJSONFieldIfNotDefault(j, "DateOfBirth", u.dateOfBirthEpochSeconds);
+    setJSONFieldIfNotDefault(j, "DateOfBirth", u.dateOfBirth);
     setJSONFieldIfNotDefault(j, "Created", u.createdEpochSeconds);
     setJSONFieldIfNotDefault(j, "Updated", u.updatedEpochSeconds);
     setJSONFieldIfNotDefault(j, "Password", u.password);
@@ -74,7 +74,7 @@ void dfx::api::from_json(const nlohmann::json& j, User& u)
 {
     getValidField(j, "ID", u.id);
     getValidField(j, "Gender", u.gender);
-    getValidField(j, "DateOfBirth", u.dateOfBirthEpochSeconds);
+    getValidField(j, "DateOfBirth", u.dateOfBirth);
     getValidField(j, "Created", u.createdEpochSeconds);
     getValidField(j, "Updated", u.updatedEpochSeconds);
     getValidField(j, "OrganizationID", u.organizationID);

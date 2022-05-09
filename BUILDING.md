@@ -9,7 +9,7 @@ if Conan or CMake should build the library is related to how you will consume
 the library. We also recommend that you use
 [Just](https://github.com/casey/just) to automate the build steps.
 
-Conan is a tool for managing C++ dependencies and if you are writing an
+*Conan* is a tool for managing C++ dependencies and if you are writing an
 application which depends on this library and is using Conan already, it is
 trivial to add as an external dependency which handles the cross-platform and
 versioning aspects for you.
@@ -73,16 +73,25 @@ You will need to invoke it from a Unix shell with access to the compilers on
 your platform. (On Windows, this would be the Git Bash shell.)
 
 ```bash
-just t=Release build  # Use t=Debug for a debug build
+just build       # Build library (default type=Debug)
+
+just             # Display help list of defaults/options
+
+just type=Release build    # Build a Release build
+just release     # Short cut for type=Release
+
+just version     # Display current library version
+just -s version  # Show steps in version recipe
+
+just shared=False type=Release build  # Build a static, release library
 ```
 
-Expect this to take a while.
+Expect this to take a while. Please see the [Build Artifacts](#build-artifacts)
+section below to find the artifacts that you built.
 
 If you don't want to use `Just`, you can follow the steps below, manually.
 
----
-
-## Building with Conan and CMake
+## Building manually using Conan and CMake (alternative to `Just`)
 
 ### Installing dependencies using Conan
 
@@ -135,7 +144,7 @@ cmake --build . --config Release
 cmake --build . --config Release --target ALL_BUILD
 ```
 
-### Build artifacts
+## Build artifacts
 
 You can find the library that was built in `build/Release/`
 

@@ -46,7 +46,8 @@ set(DOXYGEN_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}) # folders are named like api
 
 add_custom_target(
   SphinxHTML ALL
-  COMMAND ${CMAKE_COMMAND} -E env "CMAKE_BINARY_DIR=${CMAKE_BINARY_DIR}"
+  COMMAND
+    ${CMAKE_COMMAND} -E env "CMAKE_BINARY_DIR=${CMAKE_BINARY_DIR}"
     # Sphinx Executable sphinx-build is a Python script, but would use it's own virtual environment and we
     # need to let our virtual environment containing sphinx_rtd_theme, rst2pdf etc. take precedence.
     ${Python_EXECUTABLE} ${SPHINX_EXECUTABLE} -b html
@@ -75,7 +76,8 @@ add_custom_target(
 
 add_custom_target(
   SphinxLatex ALL
-  COMMAND ${CMAKE_COMMAND} -E env "CMAKE_BINARY_DIR=${CMAKE_BINARY_DIR}"
+  COMMAND
+    ${CMAKE_COMMAND} -E env "CMAKE_BINARY_DIR=${CMAKE_BINARY_DIR}"
     # Sphinx Executable sphinx-build is a Python script, but would use it's own virtual environment and we
     # need to let our virtual environment containing sphinx_rtd_theme, rst2pdf etc. take precedence.
     ${Python_EXECUTABLE} ${SPHINX_EXECUTABLE} -b latex

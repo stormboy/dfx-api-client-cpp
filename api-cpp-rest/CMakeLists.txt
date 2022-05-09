@@ -5,16 +5,16 @@ endif(NOT WITH_REST)
 add_definitions(-DWITH_REST)
 
 # Use an absolute reference here so that doxygen can locate in the doc context by target
-set(API_CPP_REST_PUBLIC_HEADERS
-    ${CMAKE_SOURCE_DIR}/api-cpp-rest/include/dfx/api/rest/DeviceREST.hpp
-    ${CMAKE_SOURCE_DIR}/api-cpp-rest/include/dfx/api/rest/LicenseREST.hpp
-    ${CMAKE_SOURCE_DIR}/api-cpp-rest/include/dfx/api/rest/MeasurementREST.hpp
-    ${CMAKE_SOURCE_DIR}/api-cpp-rest/include/dfx/api/rest/MeasurementStreamREST.hpp
-    ${CMAKE_SOURCE_DIR}/api-cpp-rest/include/dfx/api/rest/OrganizationREST.hpp
-    ${CMAKE_SOURCE_DIR}/api-cpp-rest/include/dfx/api/rest/ProfileREST.hpp
-    ${CMAKE_SOURCE_DIR}/api-cpp-rest/include/dfx/api/rest/SignalREST.hpp
-    ${CMAKE_SOURCE_DIR}/api-cpp-rest/include/dfx/api/rest/StudyREST.hpp
-    ${CMAKE_SOURCE_DIR}/api-cpp-rest/include/dfx/api/rest/UserREST.hpp)
+set(API_CPP_REST_HEADERS
+    ${CMAKE_CURRENT_LIST_DIR}/include/dfx/api/rest/DeviceREST.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/include/dfx/api/rest/LicenseREST.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/include/dfx/api/rest/MeasurementREST.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/include/dfx/api/rest/MeasurementStreamREST.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/include/dfx/api/rest/OrganizationREST.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/include/dfx/api/rest/ProfileREST.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/include/dfx/api/rest/SignalREST.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/include/dfx/api/rest/StudyREST.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/include/dfx/api/rest/UserREST.hpp)
 
 add_library(
   api-cpp-rest OBJECT
@@ -28,7 +28,7 @@ add_library(
   src/SignalREST.cpp
   src/StudyREST.cpp
   src/UserREST.cpp
-  ${API_CPP_REST_PUBLIC_HEADERS})
+  ${API_CPP_REST_HEADERS})
 
 if(MSVC)
   if(BUILD_SHARED_LIBS)
@@ -38,15 +38,15 @@ if(MSVC)
   target_compile_options(api-cpp-rest PUBLIC /utf-8)
 endif()
 
-target_compile_definitions(api-cpp-rest PRIVATE -Ddfxapi_EXPORTS)
+target_compile_definitions(api-cpp-rest PRIVATE -Ddfxcloud_EXPORTS)
 
 target_include_directories(
   api-cpp-rest
-  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-         $<BUILD_INTERFACE:$<TARGET_PROPERTY:api-cpp,INTERFACE_INCLUDE_DIRECTORIES>>)
-
-set_target_properties(api-cpp-rest PROPERTIES PUBLIC_HEADER "${API_CPP_REST_PUBLIC_HEADERS}")
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+         $<BUILD_INTERFACE:$<TARGET_PROPERTY:api-protos-web,INTERFACE_INCLUDE_DIRECTORIES>>
+  PRIVATE $<BUILD_INTERFACE:$<TARGET_PROPERTY:api-cpp,INTERFACE_INCLUDE_DIRECTORIES>>
+          $<BUILD_INTERFACE:$<TARGET_PROPERTY:api-cpp-validator,INTERFACE_INCLUDE_DIRECTORIES>>
+          $<BUILD_INTERFACE:$<TARGET_PROPERTY:api-utils,INTERFACE_INCLUDE_DIRECTORIES>>)
 
 set_target_properties(api-cpp-rest PROPERTIES CXX_VISIBILITY_PRESET hidden)
 

@@ -76,6 +76,70 @@ TEST_F(UserTests, ListUsers)
     }
 }
 
+TEST_F(UserTests, ListRetrieveUserAsAdmin)
+{
+    auto service = client->user(config);
+    if (service == nullptr) {
+        GTEST_SKIP() << "User endpoint does not exist for transport: " + config.transportType;
+    }
+
+    int16_t totalCount;
+    std::vector<User> users;
+    auto status = service->list(config, {}, 0, users, totalCount);
+    if (status.code == CLOUD_UNSUPPORTED_FEATURE) {
+        // REST has no support
+        ASSERT_EQ(config.transportType, CloudAPI::TRANSPORT_TYPE_REST) << "Expected transport to have support";
+        GTEST_SKIP() << "UserTests::ListUsers(): CLOUD_UNSUPPORTED_FEATURE";
+    } else {
+        ASSERT_EQ(status.code, CLOUD_OK) << status;
+        if (totalCount > 0) {
+            ASSERT_LE(users.size(), totalCount) << "Not enough users received";
+
+            const int MAX_USERS = 2; // Cap the number of users we will retrieve
+            int users_retrieved = 0;
+            for (const auto user : users) {
+                if (users_retrieved++ > MAX_USERS) {
+                    break;
+                }
+
+                User u;
+                status = service->retrieve(config, user.id, user.email, u);
+                ASSERT_EQ(status.code, CLOUD_OK) << status;
+
+                if (output) {
+                    output << "User Retrieved: '" << u.id << "','"
+                           << "','" << u.firstName << "','" << u.role << "'\n";
+                }
+            }
+            if (output) {
+                output << std::endl;
+            }
+        }
+    }
+}
+
+TEST_F(UserTests, RetrieveUserSelf)
+{
+    auto service = client->user(config);
+    if (service == nullptr) {
+        GTEST_SKIP() << "User endpoint does not exist for transport: " + config.transportType;
+    }
+
+    User self;
+    auto status = service->retrieve(config, self);
+    ASSERT_EQ(status.code, CLOUD_OK) << status;
+    if (status.OK()) {
+        if (output) {
+            output << "UserTests::RetrieveUserSelf():\n";
+            output << "ID: " << self.id << "\n";
+            output << "Email: " << self.email << "\n";
+            output << "Role: " << self.role << "\n";
+            output << "First Name: " << self.firstName << "\n";
+            output << "Last Name: " << self.lastName << "\n";
+        }
+    }
+}
+
 TEST_F(UserTests, CreateUpdateRemoveUser)
 {
     if (config.transportType.compare(CloudAPI::TRANSPORT_TYPE_WEBSOCKET) == 0) {
