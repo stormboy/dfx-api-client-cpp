@@ -131,7 +131,7 @@ class dfxcloud(ConanFile):
             self.build_requires("doxygen/1.9.2")
             self.build_requires("protomatlabdoxygen/20200618_2073e51")
 
-        self.build_requires("protobuf/3.19.2")                # Need protoc on build platform
+        self.build_requires("protobuf/3.20.0")                # Need protoc on build platform
         if self.options.with_grpc:
             self.build_requires("grpc/1.44.0")                # Need grpc_cpp_plugin on build platform
 
@@ -150,7 +150,7 @@ class dfxcloud(ConanFile):
             self.requires("naturalsort/20210209_5c71f46")
 
         # Protobuf is a hard requirements to generate sources, not just an override of gRPC
-        self.requires("protobuf/3.19.2")
+        self.requires("protobuf/3.20.0")
 
         # openssl is used by cmake, libwebsockets, gRPC, etc. they tend to drift and we want the latest
         # so it needs to be explicitly set here as the latest.

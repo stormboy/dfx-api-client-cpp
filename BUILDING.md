@@ -132,7 +132,7 @@ cmake .. -DCMAKE_TOOLCHAIN_FILE=conan/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=R
 On non-Windows platforms:
 
 ```bash
-cmake .. -DCMAKE_TOOLCHAIN_FILE=conan/conan_toolchain.cmake
+cmake .. -DCMAKE_TOOLCHAIN_FILE=conan/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release
 ```
 
 Then you can build using,
