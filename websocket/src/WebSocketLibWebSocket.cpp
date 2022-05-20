@@ -61,7 +61,7 @@ int WebSocketLibWebSocket::dfx_wss_callback(
 // NOLINTNEXTLINE(modernize-avoid-c-arrays)  suggests using std::array<>
 static struct lws_protocols protocols[] = {
     {
-        "wss",
+        "proto",
         ::dfx_wss_callback,
         0,
         DFX_MAX_PAYLOAD_SIZE,
@@ -201,7 +201,7 @@ void WebSocketLibWebSocket::open(const std::string& inputURL, const std::string&
         clientConnectInfo.ietf_version_or_minus_one = -1;     // IETF version is -1 (the latest one)
         clientConnectInfo.userdata = this;
 
-        clientConnectInfo.protocol = "wss"; // We use our protocol name "wss"
+        clientConnectInfo.protocol = "proto"; // We use our protocol name "wss"
         clientConnectInfo.pwsi = &wsi;      // The created client should be placed here
 
         // Connect with the client info

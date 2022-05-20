@@ -80,7 +80,7 @@ CloudStatus CloudWebSocket::connect(const CloudConfig& config)
     webSocket->setEventCallback(&CloudWebSocketCallback, this);
 
     std::string wssURL = fmt::format("wss://{}:{}", config.serverHost, config.serverPort);
-    std::string wssProtocol("wss");
+    std::string wssProtocol("proto");
     webSocket->open(wssURL, wssProtocol);
 
     // Handle the special case that the WebSocket dies during the open, the handler thread won't have

@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.2.0]
+ - Added base64 support for handling encoded study data
+ - Updated to use "proto" websocket format
+ - Updated to newer openssl
+
 ## [1.1.1]
  - Updated protobuf version to resolve grpc protobuf conflict
  - Updated CMake minimimum required format to the latest 3.23.1

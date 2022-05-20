@@ -51,4 +51,5 @@ set_target_properties(api-cpp-websocket PROPERTIES CXX_VISIBILITY_PRESET hidden)
 target_link_libraries(
   api-cpp-websocket
   PRIVATE api-protos-web api-utils websocket $<$<NOT:$<PLATFORM_ID:Emscripten>>:CURL::libcurl> fmt::fmt
-          nlohmann_json::nlohmann_json)
+          nlohmann_json::nlohmann_json
+          base64::base64)

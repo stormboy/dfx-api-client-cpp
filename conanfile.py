@@ -32,7 +32,7 @@ class dfxcloud(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "CMakeDeps", "CMakeToolchain", "versioninfo"
 
-    exports = "requirements.txt"
+    exports = "requirements.txt", "CMakeLists.txt"
     keep_imports = True   # Do not delete between build and package
     options = {
         "shared": [True, False],
@@ -120,9 +120,6 @@ class dfxcloud(ConanFile):
         if not self.options.with_docs:
             del self.options.doc_language
 
-    def source(self):
-        self.run("git clone --depth 1 -b v{} {} {}".format(self.version, self.url, self.name))
-
     def build_requirements(self):
         # Nuralogix conan repository provided
         self.build_requires("versioninfo/1.0.4")              # Inject library dependency information
@@ -155,7 +152,7 @@ class dfxcloud(ConanFile):
         # openssl is used by cmake, libwebsockets, gRPC, etc. they tend to drift and we want the latest
         # so it needs to be explicitly set here as the latest.
         if self.options.with_grpc or self.options.with_websocket or self.options.with_curl:
-            self.requires("openssl/1.1.1m", override=True)               # Override grpc dependent on 1.1.1h
+            self.requires("openssl/1.1.1n", override=True)               # Override grpc dependent on 1.1.1h
 
         if self.options.with_grpc:
             self.requires("abseil/20211102.0", override=True)
@@ -169,6 +166,7 @@ class dfxcloud(ConanFile):
 
         if self.options.with_websocket:
             self.requires("libwebsockets/4.3.0")
+            self.requires("base64/0.4.0")
 
         if self.options.with_yaml:
             self.requires("yaml-cpp/0.7.0")                   # Configuration file handling
