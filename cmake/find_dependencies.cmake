@@ -29,6 +29,7 @@ endif(WITH_CURL)
 
 if(WITH_WEBSOCKET)
   find_package(Libwebsockets CONFIG REQUIRED) # Libwebsockets::libwebsockets
+  find_package(base64 CONFIG REQUIRED) # base64::base64
 endif(WITH_WEBSOCKET)
 
 # Handles importing files from the PACKAGE_FOLDERS, analogous to ConanFile::imports() stage. Since the conan

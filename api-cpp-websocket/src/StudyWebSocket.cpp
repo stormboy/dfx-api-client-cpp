@@ -8,8 +8,11 @@
 
 #include "nlohmann/json.hpp"
 #include <fmt/format.h>
+#include <algorithm>
 #include <sstream>
 #include <string>
+
+#include "libbase64.h"
 
 #include "dfx/proto/studies.pb.h"
 
@@ -169,7 +172,25 @@ CloudStatus StudyWebSocket::retrieveStudyConfig(const CloudConfig& config,
     auto status = cloudWebSocket->sendMessage(dfx::api::web::Studies::GetConfig, request, response);
     if (status.OK()) {
         hashID = response.md5hash();
-        studyData.assign(response.configfile().begin(), response.configfile().end());
+
+        // returned data is base64 encoded, client will need it as binary data
+        const char* src = &(response.configfile()[0]);
+        size_t srclen = response.configfile().size();
+        std::vector<char> decodedData;
+        decodedData.reserve(srclen);    // Needs to be at least 2/3 the length of input
+        char* out = &(decodedData[0]);
+        size_t outlen = 0;
+        int flags = 0;
+        int result = base64_decode(src, srclen, out, &outlen, flags);
+        if ( result == 1 ) {
+            studyData.clear();;
+            studyData.reserve(outlen);
+            for(int i=0; i<outlen; i++) {
+                studyData.push_back(out[i]);
+            }
+        } else {
+            return CloudStatus(CLOUD_INTERNAL_ERROR, "Unable to decode study data");
+        }
     }
     return status;
 }
