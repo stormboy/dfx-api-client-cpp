@@ -23,11 +23,11 @@ enum class DeviceType : std::int8_t
     UNKNOWN = 0,
     IPHONE,
     ANDROID_PHONE,
-    //            WIN32,
+    // WIN32,
     DARWIN,
     IPAD,
     WINDOWS_TABLET,
-    LINUX,
+    // LINUX,
     DEBIAN
 };
 

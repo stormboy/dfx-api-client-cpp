@@ -13,7 +13,7 @@ protected:
     {
         CloudTests::SetUp();
         device.name = "TestDevice";
-        device.type = DeviceType::LINUX;
+        device.type = DeviceType::IPHONE;
         device.identifier = "DFX-LIVE";
         device.version = "2.0";
     }
