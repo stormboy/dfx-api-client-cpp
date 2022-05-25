@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.2.1]
+ - Removed enum device type LINUX, conflicts with required Visage
+   macro definition on Linux
+
 ## [1.2.0]
  - Added base64 support for handling encoded study data
  - Updated to use "proto" websocket format

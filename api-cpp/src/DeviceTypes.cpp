@@ -11,22 +11,22 @@ using namespace dfx::api;
 const std::map<DeviceType, std::string> DeviceTypeMapper::toString = {{DeviceType::UNKNOWN, "UNKNOWN"},
                                                                       {DeviceType::IPHONE, "IPHONE"},
                                                                       {DeviceType::ANDROID_PHONE, "ANDROID_PHONE"},
-                                                                      //        {DeviceTypes::WIN32,          "WIN32"},
+                                                                      // {DeviceTypes::WIN32, "WIN32"},
                                                                       {DeviceType::DARWIN, "DARWIN"},
                                                                       {DeviceType::IPAD, "IPAD"},
                                                                       {DeviceType::WINDOWS_TABLET, "WINDOWS_TABLET"},
-                                                                      {DeviceType::LINUX, "LINUX"},
+                                                                      // {DeviceType::LINUX, "LINUX"},
                                                                       {DeviceType::DEBIAN, "DEBIAN"}};
 
 // NOLINTNEXTLINE(cert-err58-cpp)
 const std::map<std::string, DeviceType> DeviceTypeMapper::toEnum{{"UNKNOWN", DeviceType::UNKNOWN},
                                                                  {"IPHONE", DeviceType::IPHONE},
                                                                  {"ANDROID_PHONE", DeviceType::ANDROID_PHONE},
-                                                                 //       {"WIN32",          DeviceTypes::WIN32},
+                                                                 // {"WIN32", DeviceTypes::WIN32},
                                                                  {"DARWIN", DeviceType::DARWIN},
                                                                  {"IPAD", DeviceType::IPAD},
                                                                  {"WINDOWS_TABLET", DeviceType::WINDOWS_TABLET},
-                                                                 {"LINUX", DeviceType::LINUX},
+                                                                 // {"LINUX", DeviceType::LINUX},
                                                                  {"DEBIAN", DeviceType::DEBIAN}};
 
 DeviceType DeviceTypeMapper::getEnum(const std::string& type)
