@@ -24,6 +24,12 @@ const CloudValidator& CloudValidator::instance()
     return instance;
 }
 
+const std::string& CloudValidator::getTransportType()
+{
+    static std::string INVALID_TRANSPORT_TYPE("Validator");
+    return INVALID_TRANSPORT_TYPE;
+}
+
 CloudStatus CloudValidator::getServerStatus(CloudConfig& config)
 {
     return CloudStatus(CLOUD_UNSUPPORTED_FEATURE);

@@ -18,7 +18,7 @@ TEST_F(LicenseTests, ListLicenses)
 {
     auto service = client->license(config);
     if (service == nullptr) {
-        GTEST_SKIP() << "License endpoint does not exist for transport: " + config.transportType;
+        GTEST_SKIP() << "License endpoint does not exist for transport: " + client->getTransportType();
     }
 
     int16_t totalCount;

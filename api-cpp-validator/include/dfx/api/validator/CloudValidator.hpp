@@ -49,6 +49,8 @@ public:
 
     CloudStatus connect(const CloudConfig& config) override;
 
+    const std::string& getTransportType() override;
+
     CloudStatus getServerStatus(CloudConfig& config) override;
 
     CloudStatus login(CloudConfig& config) override;

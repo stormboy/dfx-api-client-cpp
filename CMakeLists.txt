@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.23.1 FATAL_ERROR)
 
 # conanfile.py parses next line to determine version which feeds the version to everything
-set(DFX_CLOUD_LIBRARY_VERSION 1.2.1)
+set(DFX_CLOUD_LIBRARY_VERSION 1.2.2)
 
 project(
   dfxcloud

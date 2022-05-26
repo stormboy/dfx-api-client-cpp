@@ -115,6 +115,7 @@ static CloudStatus loadCloudConfigYAMLFile(CloudConfig& config, const std::strin
         config.timeoutMillis = 10 * 1000;
         config.secure = true;
         config.listLimit = 25;
+        config.serverPort = 443;
 
         // What is the context of the configuration we are loading? If the user provided
         // us something in the CloudConfig that takes precedence over anything in the file.

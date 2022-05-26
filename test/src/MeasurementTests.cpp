@@ -32,7 +32,7 @@ TEST_F(MeasurementTests, ListMeasurements)
 {
     auto service = client->measurement(config);
     if (service == nullptr) {
-        GTEST_SKIP() << "Measurement endpoint does not exist for transport: " + config.transportType;
+        GTEST_SKIP() << "Measurement endpoint does not exist for transport: " + client->getTransportType();
     }
 
     int16_t totalCount;
@@ -102,7 +102,7 @@ TEST_F(MeasurementTests, PerformMeasurement)
 
     auto status = measurement->setupStream(config, config.studyID);
     if (status.code == CLOUD_UNSUPPORTED_FEATURE) {
-        ASSERT_EQ(config.transportType, CloudAPI::TRANSPORT_TYPE_REST) << "REST does not support streams";
+        ASSERT_EQ(client->getTransportType(), CloudAPI::TRANSPORT_TYPE_REST) << "REST does not support streams";
         GTEST_SKIP() << status;
     }
     ASSERT_EQ(status.code, CLOUD_OK) << status;

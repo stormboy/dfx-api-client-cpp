@@ -35,7 +35,7 @@ TEST_F(DeviceTests, ListDevices)
 {
     auto service = client->device(config);
     if (service == nullptr) {
-        GTEST_SKIP() << "Device endpoint does not exist for transport: " + config.transportType;
+        GTEST_SKIP() << "Device endpoint does not exist for transport: " + client->getTransportType();
     }
 
     int16_t totalCount;

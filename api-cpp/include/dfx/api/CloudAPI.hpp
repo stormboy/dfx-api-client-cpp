@@ -170,6 +170,14 @@ public:
 
     /**
      * \~english
+     * @brief return the string identifier for the transport type of this connection.
+     *
+     * @return transport type
+     */
+    virtual const std::string& getTransportType() = 0;
+
+    /**
+     * \~english
      * @brief Get server status information, will attempt to connect.
      *
      * @param config parameters to use for communication with DeepAffex services

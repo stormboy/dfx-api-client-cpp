@@ -50,13 +50,13 @@ TEST_F(ProfileTests, listProfile)
         filters.emplace(ProfileAPI::ProfileFilter::ProfileName, profile.name);
 
         // WebSocket does not support a status filter
-        if (config.transportType.compare(CloudAPI::TRANSPORT_TYPE_WEBSOCKET) != 0) {
+        if (client->getTransportType().compare(CloudAPI::TRANSPORT_TYPE_WEBSOCKET) != 0) {
             filters.emplace(ProfileAPI::ProfileFilter::ProfileStatus, statusString);
         }
 
         auto service = client->profile(config);
         if (service == nullptr) {
-            GTEST_SKIP() << "Profile endpoint does not exist for transport: " + config.transportType;
+            GTEST_SKIP() << "Profile endpoint does not exist for transport: " + client->getTransportType();
         }
 
         auto status = service->list(config, filters, 0, profiles, totalCount);
@@ -145,7 +145,7 @@ TEST_F(ProfileTests, ProfileNotFound)
 
     auto service = client->profile(config);
     if (service == nullptr) {
-        GTEST_SKIP() << "Profile endpoint does not exist for transport: " + config.transportType;
+        GTEST_SKIP() << "Profile endpoint does not exist for transport: " + client->getTransportType();
     }
 
     Profile profile;
