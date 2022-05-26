@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.2.2]
+ - Updated sample configuration to use public API endpoint api.deepaffex.ai
+   operating on port 443.
+ - Added support for CloudAPI::getTransportType() to determine the
+   actual type of client instantiated, useful for filtering test cases.
+
 ## [1.2.1]
  - Removed enum device type LINUX, conflicts with required Visage
    macro definition on Linux

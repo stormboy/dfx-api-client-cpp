@@ -450,6 +450,11 @@ std::shared_ptr<UserAPI> CloudREST::user(const CloudConfig& config)
     return std::make_shared<UserREST>(config, std::static_pointer_cast<CloudREST>(shared_from_this()));
 }
 
+const std::string& CloudREST::getTransportType()
+{
+    return CloudAPI::TRANSPORT_TYPE_REST;
+}
+
 //     *	status			| Description
 //     *	---------------	|-----------------------------
 //     *	ACTIVE			| Online and fully operational

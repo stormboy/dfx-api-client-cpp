@@ -562,6 +562,11 @@ std::shared_ptr<UserAPI> CloudWebSocket::user(const CloudConfig& config)
     return std::make_shared<UserWebSocket>(config, std::static_pointer_cast<CloudWebSocket>(shared_from_this()));
 }
 
+const std::string& CloudWebSocket::getTransportType()
+{
+    return CloudAPI::TRANSPORT_TYPE_WEBSOCKET;
+}
+
 //     *	status			| Description
 //     *	---------------	|-----------------------------
 //     *	ACTIVE			| Online and fully operational

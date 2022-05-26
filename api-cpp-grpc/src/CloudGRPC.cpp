@@ -415,6 +415,11 @@ std::shared_ptr<::grpc::Channel> CloudGRPC::getChannel(const CloudConfig& config
     }
 }
 
+const std::string& CloudGRPC::getTransportType()
+{
+    return CloudAPI::TRANSPORT_TYPE_GRPC;
+}
+
 CloudStatus CloudGRPC::getServerStatus(CloudConfig& config)
 {
     auto channel = getChannel(config);

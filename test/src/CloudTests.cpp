@@ -40,23 +40,25 @@ void CloudTests::SetUp()
         if (config.serverHost.empty()) {
             GTEST_SKIP() << "Invalid context config: " << FLAGS_context;
         }
-
-        // Explicitly print to avoid writing out credentials in logs
-        std::cout << "--------------------------------------------------------------------------\n";
-        std::cout << "Testing with transport config type: " << config.transportType << "\n";
-        std::cout << "\tserver=";
-        if (config.transportType != CloudAPI::TRANSPORT_TYPE_GRPC) {
-            std::cout << (config.secure ? "https://" : "http://");
-        }
-        std::cout << config.serverHost << ":" << config.serverPort << "\n";
-        std::cout << "\tauth-email=" << config.authEmail << "\n";
-        std::cout << "\tauth-org=" << config.authOrg << std::endl;
-        std::cout << "--------------------------------------------------------------------------\n";
     }
-    ASSERT_EQ(status.code, CLOUD_OK) << config;
-    config.skipVerify = true;
+
+    // Explicitly print to avoid writing out credentials in logs
+    std::cout << "--------------------------------------------------------------------------\n";
+    std::cout << "Testing with transport config type: " << config.transportType << "\n";
+    std::cout << "\tserver=";
+    if (config.transportType != CloudAPI::TRANSPORT_TYPE_GRPC) {
+        std::cout << (config.secure ? "https://" : "http://");
+    }
+    std::cout << config.serverHost << ":" << config.serverPort << "\n";
+    std::cout << "\tauth-email=" << config.authEmail << "\n";
+    std::cout << "\tauth-org=" << config.authOrg << std::endl;
 
     status = dfx::api::CloudAPI::createInstance(config, client);
+    if (status.OK()) {
+        std::cout << "Instance Type: " << client->getTransportType() << "\n";
+    }
+    std::cout << "--------------------------------------------------------------------------\n";
+
     ASSERT_EQ(status.code, CLOUD_OK) << status;
     ASSERT_NE(client, nullptr) << "Cloud instance should not be null";
 
@@ -89,7 +91,7 @@ void CloudTests::TearDown()
 
     if (fixtureDidRegisterDevice && !config.deviceToken.empty()) {
         // REST fails with RESTRICTED_ACCESS, skip if REST
-        if (config.transportType.compare("REST") != 0) {
+        if (client->getTransportType().compare(CloudAPI::TRANSPORT_TYPE_REST) != 0) {
             auto status = client->unregisterDevice(config);
             ASSERT_EQ(status.code, CLOUD_OK) << status;
         }

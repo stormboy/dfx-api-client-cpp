@@ -36,7 +36,7 @@ TEST_F(OrganizationTests, ListOrganizations)
 {
     auto service = client->organization(config);
     if (service == nullptr) {
-        GTEST_SKIP() << "Organization endpoint does not exist for transport: " + config.transportType;
+        GTEST_SKIP() << "Organization endpoint does not exist for transport: " + client->getTransportType();
     }
 
     int16_t totalCount;
@@ -92,7 +92,7 @@ TEST_F(OrganizationTests, CreateRetrieveOrganization)
                                   organization.logo,
                                   organizationID);
     if (status.code == CLOUD_UNSUPPORTED_FEATURE) {
-        ASSERT_NE(config.transportType, CloudAPI::TRANSPORT_TYPE_GRPC) << "gRPC has implementation";
+        ASSERT_NE(client->getTransportType(), CloudAPI::TRANSPORT_TYPE_GRPC) << "gRPC has implementation";
         GTEST_SKIP() << "OrganizationTests::CreateRetrieveOrganization(): CLOUD_UNSUPPORTED_FEATURE";
     }
 

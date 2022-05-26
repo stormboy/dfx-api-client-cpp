@@ -18,7 +18,7 @@ protected:
         CloudTests::SetUp();
         user.email = fmt::format("testuser-{}@nuralogix.ai", random_num);
         user.password = "^8OlK6r7IXmz&73";
-        if (config.transportType == CloudAPI::TRANSPORT_TYPE_GRPC) {
+        if (client->getTransportType().compare(CloudAPI::TRANSPORT_TYPE_GRPC) == 1) {
             user.role = "LEAD";
         } else {
             user.role = "DFX_LEAD";
@@ -49,7 +49,7 @@ TEST_F(UserTests, ListUsers)
 {
     auto service = client->user(config);
     if (service == nullptr) {
-        GTEST_SKIP() << "User endpoint does not exist for transport: " + config.transportType;
+        GTEST_SKIP() << "User endpoint does not exist for transport: " + client->getTransportType();
     }
 
     int16_t totalCount;
@@ -57,8 +57,10 @@ TEST_F(UserTests, ListUsers)
     auto status = service->list(config, {}, 0, users, totalCount);
     if (status.code == CLOUD_UNSUPPORTED_FEATURE) {
         // REST has no support
-        ASSERT_EQ(config.transportType, CloudAPI::TRANSPORT_TYPE_REST) << "Expected transport to have support";
+        ASSERT_EQ(client->getTransportType(), CloudAPI::TRANSPORT_TYPE_REST) << "Expected transport to have support";
         GTEST_SKIP() << "UserTests::ListUsers(): CLOUD_UNSUPPORTED_FEATURE";
+    } else if (status.code == CLOUD_USER_NOT_AUTHORIZED) {
+        GTEST_SKIP() << "UserTests::ListUsers(): CLOUD_USER_NOT_AUTHORIZED";
     } else {
         ASSERT_EQ(status.code, CLOUD_OK) << status;
         if (totalCount != 0) {
@@ -80,7 +82,7 @@ TEST_F(UserTests, ListRetrieveUserAsAdmin)
 {
     auto service = client->user(config);
     if (service == nullptr) {
-        GTEST_SKIP() << "User endpoint does not exist for transport: " + config.transportType;
+        GTEST_SKIP() << "User endpoint does not exist for transport: " + client->getTransportType();
     }
 
     int16_t totalCount;
@@ -88,8 +90,10 @@ TEST_F(UserTests, ListRetrieveUserAsAdmin)
     auto status = service->list(config, {}, 0, users, totalCount);
     if (status.code == CLOUD_UNSUPPORTED_FEATURE) {
         // REST has no support
-        ASSERT_EQ(config.transportType, CloudAPI::TRANSPORT_TYPE_REST) << "Expected transport to have support";
-        GTEST_SKIP() << "UserTests::ListUsers(): CLOUD_UNSUPPORTED_FEATURE";
+        ASSERT_EQ(client->getTransportType(), CloudAPI::TRANSPORT_TYPE_REST) << "Expected transport to have support";
+        GTEST_SKIP() << "UserTests::ListRetrieveUserAsAdmin(): CLOUD_UNSUPPORTED_FEATURE";
+    } else if (status.code == CLOUD_USER_NOT_AUTHORIZED) {
+        GTEST_SKIP() << "UserTests::ListRetrieveUserAsAdmin(): CLOUD_USER_NOT_AUTHORIZED";
     } else {
         ASSERT_EQ(status.code, CLOUD_OK) << status;
         if (totalCount > 0) {
@@ -122,7 +126,7 @@ TEST_F(UserTests, RetrieveUserSelf)
 {
     auto service = client->user(config);
     if (service == nullptr) {
-        GTEST_SKIP() << "User endpoint does not exist for transport: " + config.transportType;
+        GTEST_SKIP() << "User endpoint does not exist for transport: " + client->getTransportType();
     }
 
     User self;
@@ -142,13 +146,13 @@ TEST_F(UserTests, RetrieveUserSelf)
 
 TEST_F(UserTests, CreateUpdateRemoveUser)
 {
-    if (config.transportType.compare(CloudAPI::TRANSPORT_TYPE_WEBSOCKET) == 0) {
+    if (client->getTransportType().compare(CloudAPI::TRANSPORT_TYPE_WEBSOCKET) == 0) {
         GTEST_SKIP() << "WebSocket Users does not allow admin management (Organization) functionality";
     }
 
     auto service = client->user(config);
     if (service == nullptr) {
-        GTEST_SKIP() << "User endpoint does not exist for transport: " + config.transportType;
+        GTEST_SKIP() << "User endpoint does not exist for transport: " + client->getTransportType();
     }
 
     std::string userID;

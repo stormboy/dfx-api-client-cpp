@@ -7,8 +7,8 @@
 #include "dfx/api/websocket/CloudWebSocket.hpp"
 
 #include "nlohmann/json.hpp"
-#include <fmt/format.h>
 #include <algorithm>
+#include <fmt/format.h>
 #include <sstream>
 #include <string>
 
@@ -177,15 +177,15 @@ CloudStatus StudyWebSocket::retrieveStudyConfig(const CloudConfig& config,
         const char* src = &(response.configfile()[0]);
         size_t srclen = response.configfile().size();
         std::vector<char> decodedData;
-        decodedData.reserve(srclen);    // Needs to be at least 2/3 the length of input
+        decodedData.reserve(srclen); // Needs to be at least 2/3 the length of input
         char* out = &(decodedData[0]);
         size_t outlen = 0;
         int flags = 0;
         int result = base64_decode(src, srclen, out, &outlen, flags);
-        if ( result == 1 ) {
-            studyData.clear();;
+        if (result == 1) {
+            studyData.clear();
             studyData.reserve(outlen);
-            for(int i=0; i<outlen; i++) {
+            for (int i = 0; i < outlen; i++) {
                 studyData.push_back(out[i]);
             }
         } else {

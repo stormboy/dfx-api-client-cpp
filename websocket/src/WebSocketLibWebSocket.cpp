@@ -202,7 +202,7 @@ void WebSocketLibWebSocket::open(const std::string& inputURL, const std::string&
         clientConnectInfo.userdata = this;
 
         clientConnectInfo.protocol = "proto"; // We use our protocol name "wss"
-        clientConnectInfo.pwsi = &wsi;      // The created client should be placed here
+        clientConnectInfo.pwsi = &wsi;        // The created client should be placed here
 
         // Connect with the client info
         lws_client_connect_via_info(&clientConnectInfo);
