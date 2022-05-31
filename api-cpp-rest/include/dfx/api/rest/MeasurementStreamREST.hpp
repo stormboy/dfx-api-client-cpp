@@ -17,7 +17,9 @@ public:
     ~MeasurementStreamREST() override;
 
 private:
-    CloudStatus setupStream(const CloudConfig& config, const std::string& studyID) override;
+    CloudStatus setupStream(const CloudConfig& config,
+                            const std::string& studyID,
+                            const std::map<CreateProperty, std::string>& properties = {}) override;
 };
 
 } // namespace dfx::api::rest

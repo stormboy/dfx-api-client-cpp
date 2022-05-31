@@ -72,9 +72,11 @@ void MeasurementStreamGRPC::initialize()
     writerClosedStream = false;
 }
 
-CloudStatus MeasurementStreamGRPC::setupStream(const CloudConfig& config, const std::string& studyID)
+CloudStatus MeasurementStreamGRPC::setupStream(const CloudConfig& config,
+                                               const std::string& studyID,
+                                               const std::map<CreateProperty, std::string>& properties)
 {
-    DFX_CLOUD_VALIDATOR_MACRO(MeasurementStreamValidator, setupStream(config, studyID));
+    DFX_CLOUD_VALIDATOR_MACRO(MeasurementStreamValidator, setupStream(config, studyID, properties));
 
     std::unique_lock<std::recursive_mutex> lock(mutex);
 

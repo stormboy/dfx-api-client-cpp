@@ -82,7 +82,7 @@ MeasurementCreateCommand::MeasurementCreateCommand(CLI::App* app,
                                                    std::shared_ptr<Options> options,
                                                    DFXExitCode& result)
     : DFXAppCommand(std::move(options)), disableFileNameSort(false), delay(1000), verbose(false), metrics(false),
-      warnings(false), needsSaving(false)
+      warnings(false), noaverage(false), streaming(false), needsSaving(false)
 {
     if (app == nullptr) {
         cmd = create->add_subcommand("measurement", "Create a new measurement");
@@ -96,6 +96,8 @@ MeasurementCreateCommand::MeasurementCreateCommand(CLI::App* app,
     cmd->add_flag("-v,--verbose", verbose, "Verbose information, show warnings and flow")->capture_default_str();
     cmd->add_flag("-m,--metrics", metrics, "Include metrics data in output")->capture_default_str();
     cmd->add_flag("-w,--warnings", warnings, "Include warnings data in output")->capture_default_str();
+    cmd->add_flag("--noaverage", noaverage, "Do not average the result data")->capture_default_str();
+    cmd->add_flag("--streaming", streaming, "Use streaming mode")->capture_default_str();
     cmd->add_option("payloads", files, "Payload files to send, or directory containing payload*.bin")
         ->check(CLI::ExistingPath)
         ->required();
@@ -195,7 +197,17 @@ DFXExitCode MeasurementCreateCommand::execute()
         }
     });
 
-    auto status = measurementStream->setupStream(config, study);
+    std::map<dfx::api::MeasurementStreamAPI::CreateProperty, std::string> properties;
+    if (noaverage) {
+        properties[dfx::api::MeasurementStreamAPI::CreateProperty::Resolution] = "100"; // 100% of data
+    } else {
+        properties[dfx::api::MeasurementStreamAPI::CreateProperty::Resolution] = "0"; // Average response data, default
+    }
+    if (streaming) {
+        properties[dfx::api::MeasurementStreamAPI::CreateProperty::Mode] = "STREAMING";
+    }
+
+    auto status = measurementStream->setupStream(config, study, properties);
     if (status.code != CLOUD_OK) {
         outputError(status);
         return DFXExitCode::FAILURE;

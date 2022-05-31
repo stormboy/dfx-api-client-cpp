@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.3.0]
+ - Added support for passing WebSocket MeasurementStream properties
+   during stream setup for things like resolution and streaming.
+ - Bug fixed uninitialized WebSocket MeasurementResult
+
 ## [1.2.2]
  - Updated sample configuration to use public API endpoint api.deepaffex.ai
    operating on port 443.

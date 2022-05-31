@@ -18,7 +18,9 @@ MeasurementStreamAPI::~MeasurementStreamAPI()
     assert(measurementClosed);
 }
 
-CloudStatus MeasurementStreamAPI::setupStream(const CloudConfig& config, const std::string& studyID)
+CloudStatus MeasurementStreamAPI::setupStream(const CloudConfig& config,
+                                              const std::string& studyID,
+                                              const std::map<CreateProperty, std::string>& createProperties)
 {
     return CloudStatus(CLOUD_UNIMPLEMENTED_FEATURE);
 }

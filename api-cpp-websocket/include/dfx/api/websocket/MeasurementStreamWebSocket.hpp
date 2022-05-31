@@ -36,7 +36,9 @@ private:
 
     void initialize();
 
-    CloudStatus setupStream(const CloudConfig& config, const std::string& studyID) override;
+    CloudStatus setupStream(const CloudConfig& config,
+                            const std::string& studyID,
+                            const std::map<CreateProperty, std::string>& properties = {}) override;
 
     void handleStreamResponse(const std::shared_ptr<std::vector<uint8_t>>& message);
 
