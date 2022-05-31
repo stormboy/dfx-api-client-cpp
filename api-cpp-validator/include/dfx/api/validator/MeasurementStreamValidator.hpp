@@ -18,7 +18,9 @@ public:
 
     ~MeasurementStreamValidator() override;
 
-    virtual CloudStatus setupStream(const CloudConfig& config, const std::string& studyID) override;
+    virtual CloudStatus setupStream(const CloudConfig& config,
+                                    const std::string& studyID,
+                                    const std::map<CreateProperty, std::string>& properties = {}) override;
 
     virtual CloudStatus sendChunk(const CloudConfig& config,
                                   const std::vector<uint8_t>& chunk,

@@ -46,7 +46,9 @@ public:
 
     ~MeasurementStreamGRPC() override;
 
-    CloudStatus setupStream(const CloudConfig& config, const std::string& studyID) override;
+    CloudStatus setupStream(const CloudConfig& config,
+                            const std::string& studyID,
+                            const std::map<CreateProperty, std::string>& properties = {}) override;
 
     CloudStatus sendChunk(const CloudConfig& config, const std::vector<uint8_t>& chunk, bool isLastChunk) override;
 

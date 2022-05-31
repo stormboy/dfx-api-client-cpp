@@ -46,7 +46,9 @@ void MeasurementStreamWebSocket::initialize()
     chunksOutstanding = 0;
 }
 
-CloudStatus MeasurementStreamWebSocket::setupStream(const CloudConfig& config, const std::string& studyID)
+CloudStatus MeasurementStreamWebSocket::setupStream(const CloudConfig& config,
+                                                    const std::string& studyID,
+                                                    const std::map<CreateProperty, std::string>& properties)
 {
     DFX_CLOUD_VALIDATOR_MACRO(MeasurementStreamValidator, setupStream(config, studyID));
 
@@ -71,6 +73,61 @@ CloudStatus MeasurementStreamWebSocket::setupStream(const CloudConfig& config, c
     {
         dfx::proto::measurements::CreateRequest request;
         dfx::proto::measurements::CreateResponse response;
+
+        if (properties.size() > 0) {
+            {
+                auto it = properties.find(CreateProperty::UserProfileID);
+                if (it != properties.end()) {
+                    request.set_userprofileid(it->second);
+                }
+            }
+            {
+                auto it = properties.find(CreateProperty::DeviceVersion);
+                if (it != properties.end()) {
+                    request.set_deviceversion(it->second);
+                }
+            }
+            {
+                auto it = properties.find(CreateProperty::Notes);
+                if (it != properties.end()) {
+                    request.set_notes(it->second);
+                }
+            }
+            {
+                auto it = properties.find(CreateProperty::Mode);
+                if (it != properties.end()) {
+                    auto mode = it->second;
+                    if (mode.compare("STREAMING") == 0) {
+                        request.set_mode(mode);
+                    } else if (mode.compare("") == 0) {
+                        // Default, do nothing
+                    } else {
+                        return CloudStatus(CLOUD_PARAMETER_VALIDATION_ERROR,
+                                           fmt::format("Expected mode=STREAMING or empty, received {}", mode));
+                    }
+                }
+            }
+            {
+                auto it = properties.find(CreateProperty::PartnerID);
+                if (it != properties.end()) {
+                    request.set_partnerid(it->second);
+                }
+            }
+            {
+                auto it = properties.find(CreateProperty::Resolution);
+                if (it != properties.end()) {
+                    int resolution = 0;
+                    try {
+                        resolution = std::stoi(it->second);
+                    } catch (...) {
+                    }
+                    if (resolution > 0) {
+                        resolution = 100;
+                    }
+                    request.set_resolution(resolution);
+                }
+            }
+        }
 
         request.set_studyid(studyID);
         auto status = cloudWebSocket->sendMessage(dfx::api::web::Measurements::Create, request, response);
@@ -198,7 +255,7 @@ void MeasurementStreamWebSocket::handleStreamResponse(const std::shared_ptr<std:
                 const auto& error = response.error();
                 const auto& errorCode = error.code();
                 if (errorCode != "OK") {
-                    MeasurementWarning warning;
+                    MeasurementWarning warning{};
                     warning.warningCode = -1;                     // Code & message, both strings :(
                     warning.warningMessage = error.DebugString(); // Hopefully it says something
                     warning.timestampMS = 0;                      // Nothing available
@@ -225,9 +282,11 @@ void MeasurementStreamWebSocket::handleStreamResponse(const std::shared_ptr<std:
                 chunkNumber = std::stoi(measurementDataID);
             }
 
-            MeasurementResult result;
+            MeasurementResult result{};
             result.faceID = "1"; // V2 WebSocket only supports one face ID presently
             result.chunkOrder = chunkNumber;
+            result.timestampMS = 0; // Nothing available
+            result.frameEndTimestampMS = 0;
 
             // /////////////////////////////////////////
             // SubscribeResultsResponse Proto Definition

@@ -21,7 +21,9 @@ const MeasurementStreamValidator& MeasurementStreamValidator::instance()
     return instance;
 }
 
-CloudStatus MeasurementStreamValidator::setupStream(const CloudConfig& config, const std::string& studyID)
+CloudStatus MeasurementStreamValidator::setupStream(const CloudConfig& config,
+                                                    const std::string& studyID,
+                                                    const std::map<CreateProperty, std::string>& properties)
 {
     return CloudStatus(CLOUD_OK);
 }

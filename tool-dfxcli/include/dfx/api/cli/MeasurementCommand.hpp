@@ -31,6 +31,8 @@ private:
     bool verbose;
     bool metrics;
     bool warnings;
+    bool noaverage;
+    bool streaming;
     std::string outputFile;
 
     bool needsSaving;

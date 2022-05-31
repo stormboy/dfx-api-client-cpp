@@ -100,6 +100,16 @@ typedef std::function<void(const MeasurementWarning& warning)> MeasurementWarnin
 class DFXCLOUD_EXPORT MeasurementStreamAPI
 {
 public:
+    enum class CreateProperty
+    {
+        UserProfileID,
+        DeviceVersion,
+        Notes,
+        Mode, ///< For streaming set Mode="STREAMING"
+        PartnerID,
+        Resolution ///< Resolution=0 averages results (default), Resolution=100 is non-averaged
+    };
+
     /**
      * @brief MeasurementStreamAPI constructor.
      */
@@ -117,7 +127,9 @@ public:
      * @param studyID
      * @return status of operation, CLOUD_OK on SUCCESS
      */
-    virtual CloudStatus setupStream(const CloudConfig& config, const std::string& studyID);
+    virtual CloudStatus setupStream(const CloudConfig& config,
+                                    const std::string& studyID,
+                                    const std::map<CreateProperty, std::string>& createProperties = {});
 
     /**
      * @brief Asynchronously send a payload chunk to the server for processing.

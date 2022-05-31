@@ -18,7 +18,9 @@ MeasurementStreamREST::MeasurementStreamREST(const CloudConfig& config)
 
 MeasurementStreamREST::~MeasurementStreamREST() {}
 
-CloudStatus MeasurementStreamREST::setupStream(const CloudConfig& config, const std::string& studyID)
+CloudStatus MeasurementStreamREST::setupStream(const CloudConfig& config,
+                                               const std::string& studyID,
+                                               const std::map<CreateProperty, std::string>& properties)
 {
     return CloudStatus(CLOUD_UNSUPPORTED_FEATURE,
                        fmt::format("{} does not support {} end-point", "REST", "measurement stream"));
