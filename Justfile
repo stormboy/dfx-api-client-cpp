@@ -44,10 +44,10 @@ build: (_display "Building with settings:")
     conan install . -pr:b=default --build missing -if "${folder}" -o dfxcloud:enable_checks="${checks}" -o dfxcloud:with_docs="${docs}" -o dfxcloud:shared="${shared}" -s build_type="${type}"
     cd "${folder}"
     if [ -z "${MSYSTEM+x}" ]; then
-      cmake .. -DCMAKE_TOOLCHAIN_FILE=conan/conan_toolchain.cmake
+      cmake .. -DCMAKE_TOOLCHAIN_FILE=conan/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=${type}
       make -j$(nproc) install
     else
-      cmake .. -DCMAKE_TOOLCHAIN_FILE=conan/conan_toolchain.cmake
+      cmake .. -DCMAKE_TOOLCHAIN_FILE=conan/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=${type}
       cmake --build . --config "${type}" --target ALL_BUILD
     fi
 
@@ -121,7 +121,7 @@ docs:
 conan:
     #!/usr/bin/env bash
     set -euo pipefail
-    conan create . -pr:b=default --build missing -if "${folder}" -o dfxcloud:enable_checks="${checks}" -o dfxcloud:with_docs="${docs}" -o dfxcloud:shared="${shared}" -s build_type="${type}"
+    conan create . -pr:b=default --build missing -o dfxcloud:enable_checks="${checks}" -o dfxcloud:with_docs="${docs}" -o dfxcloud:shared="${shared}" -s build_type="${type}"
 
 # Updates licenses using https://github.com/lsm-dev/license-header-checker
 update-license:
