@@ -173,7 +173,7 @@ CloudStatus MeasurementStreamAPI::waitForCompletion(const CloudConfig& config, i
 {
     std::unique_lock<std::mutex> lock(measurementMutex);
     if (!measurementClosed) { // Need to check before waiting on condition, reader thread may never set
-        if (timeoutMillis >= 0) {
+        if (timeoutMillis == 0) {
             cvWaitForCompletion.wait(lock); // User wants to wait until we get notified
         } else {
             if (std::cv_status::timeout == cvWaitForCompletion.wait_for(lock, timeoutMillis * 1ms)) {

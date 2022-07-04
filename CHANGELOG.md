@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.3.1]
+ - Fixed bug in WebSocket MeasurementStreamAPI.waitForCompletion when
+   timeout was not the default wait forever value.
+
 ## [1.3.0]
  - Added support for passing WebSocket MeasurementStream properties
    during stream setup for things like resolution and streaming.
