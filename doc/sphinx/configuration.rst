@@ -54,7 +54,7 @@ Alternatively, this could be manually constructed in source:
    config.serverHost="https://api.deepaffex.ai";
    config.serverPort=443;
    config.studyID="1a815f20-44cb-4f05-b04c-edea380ab0c1";
-   config.transportType=CloudAPI::TRANSPORT_TYPE_WEBSOCKET;
+   config.transportType=CloudAPI::TRANSPORT_TYPE_WEBSOCKET_PROTOBUF;
 
 In more advanced scenarios, the `dfxcloud.yaml` may contain multiple server and user credential
 configurations which are identified by the `context` key. It achieves this by processing the file

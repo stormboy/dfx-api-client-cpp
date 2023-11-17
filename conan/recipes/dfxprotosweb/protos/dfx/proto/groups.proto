@@ -1,0 +1,154 @@
+/*
+ *              Copyright (c) 2016-2019, Nuralogix Corp.
+ *                      All Rights reserved
+ *
+ *      THIS SOFTWARE IS LICENSED BY AND IS THE CONFIDENTIAL AND
+ *      PROPRIETARY PROPERTY OF NURALOGIX CORP. IT IS
+ *      PROTECTED UNDER THE COPYRIGHT LAWS OF THE USA, CANADA
+ *      AND OTHER FOREIGN COUNTRIES. THIS SOFTWARE OR ANY
+ *      PART THEREOF, SHALL NOT, WITHOUT THE PRIOR WRITTEN CONSENT
+ *      OF NURALOGIX CORP, BE USED, COPIED, DISCLOSED,
+ *      DECOMPILED, DISASSEMBLED, MODIFIED OR OTHERWISE TRANSFERRED
+ *      EXCEPT IN ACCORDANCE WITH THE TERMS AND CONDITIONS OF A
+ *      NURALOGIX CORP SOFTWARE LICENSE AGREEMENT.
+ */
+syntax = "proto3";
+
+option cc_enable_arenas = true;
+option java_package = "ai.nuralogix.dfx";
+option java_outer_classname = "Groups";
+
+package dfx.proto.groups;
+
+service Services {
+  rpc Types       (TypesRequest)       returns (TypesResponse)      {}
+  rpc List        (ListRequest)        returns (ListResponse)       {}
+  rpc Create      (CreateRequest)      returns (CreateResponse)     {}
+  rpc Retrieve    (RetrieveRequest)    returns (RetrieveResponse)   {}
+  rpc Update      (UpdateRequest)      returns (UpdateResponse)     {}
+  rpc Remove      (RemoveRequest)      returns (RemoveResponse)     {}
+  rpc AddUsers    (AddUsersRequest)    returns (AddUsersResponse)   {}
+  rpc RemoveUsers (RemoveUsersRequest) returns (RemoveUsersResponse) {}
+  rpc GetUsers    (GetUsersRequest)    returns (GetUsersResponse)   {}
+}
+
+// Types
+message TypesRequest {}
+message TypesResponse {
+  message Type {
+    string ID = 1;
+    string Name = 2;
+    string Description = 3;
+  }
+  repeated Type Values = 1;
+}
+
+// List
+message ListRequest {
+  message QueryValues {
+    string Type = 1;
+  }
+  QueryValues Query = 1;
+}
+message ListResponse {
+  message Group {
+    string ID = 1;
+    string Name = 2;
+    string GroupTypeID = 3;
+    string StatusID = 4;
+    string Description = 5;
+    int32 Users = 6;
+    uint32 Created = 7;
+    uint32 Updated = 8;
+  }
+  repeated Group Values = 1;
+}
+
+// Retrieve
+message RetrieveRequest {
+  message ParamValues {
+    string ID = 1;
+  }
+  ParamValues Params = 1;
+}
+message RetrieveResponse {
+  message ParamValues {
+    string ID = 1;
+  }
+  ParamValues Params = 1;
+  string ID = 2;
+  string Name = 3;
+  string GroupTypeID = 4;
+  string StatusID = 5;
+  string Description = 6;
+  int32 Users = 7;
+  uint32 Created = 8;
+  uint32 Updated = 9;
+}
+
+// Create
+message CreateRequest {
+  string Name = 1;
+  string GroupTypeID = 2;
+  string Description = 3;
+}
+message CreateResponse {
+  string ID = 1;
+}
+
+// Update
+message UpdateRequest {
+  message ParamValues {
+    string ID = 1;
+  }
+  string Name = 1;
+  string GroupTypeID = 2;
+  string Description = 3;
+  ParamValues Params = 4;
+}
+message UpdateResponse {}
+
+// Remove
+message RemoveRequest {
+  message ParamValues {
+    string ID = 1;
+  }
+  ParamValues Params = 1;
+}
+message RemoveResponse {}
+
+// Add Users
+message AddUsersRequest {
+  message ParamValues {
+    string ID = 1;
+  }
+  ParamValues Params = 1;
+  repeated string Values = 2;
+}
+message AddUsersResponse {
+  repeated string Values = 1;
+}
+
+// Remove Users
+message RemoveUsersRequest {
+  message ParamValues {
+    string ID = 1;
+  }
+  ParamValues Params = 1;
+  repeated string Values = 2;
+}
+message RemoveUsersResponse {
+  repeated string Values = 1;
+}
+
+// List Users
+message GetUsersRequest {
+  message ParamValues {
+    string ID = 1;
+  }
+  ParamValues Params = 1;
+  repeated string Values = 2;
+}
+message GetUsersResponse {
+  repeated string Values = 1;
+}

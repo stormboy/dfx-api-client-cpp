@@ -184,7 +184,6 @@ CloudStatus SignalGRPC::retrieveStudySignalIDs(const CloudConfig& config,
 
     if (response.has_study_signal()) {
         const auto& studySignal = response.study_signal();
-        // TODO: Need to finish the implementation
         return CloudStatus(CLOUD_UNIMPLEMENTED_FEATURE);
     } else {
         return CloudStatus(CLOUD_RECORD_NOT_FOUND);
@@ -243,7 +242,5 @@ CloudStatus SignalGRPC::retrieveSignalDetails(const CloudConfig& config,
 
     MACRO_RETURN_ERROR_IF_GRPC_STATUS_NOT_OK(grpcSignalsStub->RetrieveMultiple(&context, request, &response));
 
-    // TODO: Need to finish the implementation
     return CloudStatus(CLOUD_UNIMPLEMENTED_FEATURE);
-    return CloudStatus(CLOUD_OK);
 }

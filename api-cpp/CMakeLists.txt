@@ -51,7 +51,6 @@ add_library(
   src/StudyTypes.cpp
   src/UserTypes.cpp
   $<$<BOOL:${EMBED_CA_CERTS}>:cacert.c>
-  ${CMAKE_BINARY_DIR}/version_info.cpp
   ${API_CPP_PUBLIC_HEADERS})
 
 # These install to a separate folder but when they were clumped, they all installed to the same destination
@@ -89,11 +88,14 @@ target_link_libraries(
   api-cpp
   PUBLIC nlohmann_json::nlohmann_json api-cpp-types
   PRIVATE $<BUILD_INTERFACE:api-utils>
+          dfxprotosweb::dfxprotosweb
+          protobuf::protobuf
           $<BUILD_INTERFACE:$<$<BOOL:${WITH_CURL}>:CURL::libcurl>>
           $<BUILD_INTERFACE:$<$<BOOL:${WITH_YAML}>:yaml-cpp::yaml-cpp>>
           $<BUILD_INTERFACE:$<$<BOOL:${WITH_GRPC}>:api-cpp-grpc>>
           $<BUILD_INTERFACE:$<$<BOOL:${WITH_REST}>:api-cpp-rest>>
-          $<BUILD_INTERFACE:$<$<BOOL:${WITH_WEBSOCKET}>:api-cpp-websocket>>)
+          $<BUILD_INTERFACE:$<$<BOOL:${WITH_WEBSOCKET_PROTOBUF}>:api-cpp-websocket-protobuf>>
+          $<BUILD_INTERFACE:$<$<BOOL:${WITH_WEBSOCKET_JSON}>:api-cpp-websocket-json>>)
 
 if(EMBED_CA_CERTS)
   embed_file("cacert" "${CMAKE_SOURCE_DIR}/resources/cacert.pem" cacert.c)
@@ -112,9 +114,13 @@ if(WITH_REST)
   target_compile_definitions(api-cpp PRIVATE WITH_REST)
 endif(WITH_REST)
 
-if(WITH_WEBSOCKET)
-  target_compile_definitions(api-cpp PRIVATE WITH_WEBSOCKET)
-endif(WITH_WEBSOCKET)
+if(WITH_WEBSOCKET_PROTOBUF)
+  target_compile_definitions(api-cpp PRIVATE WITH_WEBSOCKET_PROTOBUF)
+endif(WITH_WEBSOCKET_PROTOBUF)
+
+if(WITH_WEBSOCKET_JSON)
+  target_compile_definitions(api-cpp PRIVATE WITH_WEBSOCKET_JSON)
+endif(WITH_WEBSOCKET_JSON)
 
 if(WITH_YAML)
   target_compile_definitions(api-cpp PRIVATE WITH_YAML)

@@ -95,12 +95,21 @@ public:
 
     /**
      * \~english
-     * The WebSocket transport type.
+     * The WebSocket transport type with binary protobuf payloads.
      *
      * \~chinese
      * WebSocket传输类型。
      */
-    const static std::string TRANSPORT_TYPE_WEBSOCKET;
+    const static std::string TRANSPORT_TYPE_WEBSOCKET_PROTOBUF;
+
+    /**
+     * \~english
+     * The WebSocket transport type with JSON payloads.
+     *
+     * \~chinese
+     * WebSocket传输类型。
+     */
+    const static std::string TRANSPORT_TYPE_WEBSOCKET_JSON;
 
     /**
      * \~english
@@ -181,6 +190,7 @@ public:
      * @brief Get server status information, will attempt to connect.
      *
      * @param config parameters to use for communication with DeepAffex services
+     * @param response json response from the server
      * @return status of the operation
      * @see logout
      *
@@ -188,9 +198,10 @@ public:
      * @brief 获取服务器的状态信息，状态和版本信息
      *
      * @param config 云端配置
+     * @param response 服务端返回的json数据
      * @return CloudStatus
      */
-    virtual CloudStatus getServerStatus(CloudConfig& config) = 0;
+    virtual CloudStatus getServerStatus(CloudConfig& config, std::string& response) = 0;
 
     /**
      * \~english
@@ -232,6 +243,23 @@ public:
 
     /**
      * \~english
+     * @brief Login to the DFX Server using an existing user token.
+     *
+     * @param config parameters to use for communication with DeepAffex services
+     * @param token token to login with
+     * @return status of the operation
+     * @see logout
+     *
+     * \~chinese
+     * @brief 登录服务,用户令牌将返回在Config.m_sUserToken
+     * @param config 云端配置
+     * @param token 用户令牌
+     * @return CloudStatus
+     */
+    virtual CloudStatus loginWithToken(CloudConfig& config, std::string& token) = 0;
+
+    /**
+     * \~english
      * @brief Logout of the DFX Server clearing the Config.m_sUserToken on CLOUD_OK.
      *
      * @param config parameters to use for communication with DeepAffex services
@@ -254,6 +282,8 @@ public:
      * @param config parameters to use for communication with DeepAffex services
      * @param appName
      * @param appVersion
+     * @param tokenExpiresInSeconds
+     * @param tokenSubject
      * @return
      * @see unregisterDevice
      *
@@ -263,12 +293,16 @@ public:
      * @param config 云端配置参数
      * @param appName 设备名称(自定义)
      * @param appVersion 设备版本(x.x.xx)
+     * @param tokenExpiresInSeconds
+     * @param tokenSubject
      * @return CloudStatus
      * @see unregisterDevice
      */
     virtual CloudStatus registerDevice(CloudConfig& config,
                                        const std::string& appName,
-                                       const std::string& appVersion) = 0;
+                                       const std::string& appVersion,
+                                       const uint16_t tokenExpiresInSeconds,
+                                       const std::string& tokenSubject) = 0;
 
     /**
      * \~english
@@ -289,21 +323,40 @@ public:
 
     /**
      * \~english
-     * @brief Validate the user token passed
+     * @brief Verify the token used for communication
      *
      * @param config parameters to use for communication with DeepAffex services
-     * @param token
+     * @param response json response from the server
      * @return status of the operation
-     * @see validateToken
      *
      * \~chinese
      * @brief 验证用户令牌
      *
      * @param config 服务配置参数
-     * @param token	用户令牌
+     * @param response 服务端返回的json数据
      * @return CloudStatus
      */
-    virtual CloudStatus validateToken(const CloudConfig& config, const std::string& token) = 0;
+    virtual CloudStatus verifyToken(const CloudConfig& config, std::string& response) = 0;
+
+    /**
+     * \~english
+     * @brief Renew the user/device token and refresh token passed
+     *
+     * @param config parameters to use for communication with DeepAffex services
+     * @param token user/device token to renew, will be updated with the new token on SUCCESS
+     * @param refreshToken refreshToken to renew, will be updated with the new refreshToken on SUCCESS
+     * @return status of the operation
+     *
+     * \~chinese
+     * @brief 验证用户令牌
+     *
+     * @param config 服务配置参数
+     * @param token 用户令牌
+     * @param refreshToken 刷新令牌
+     * @param response 服务端返回的json数据
+     * @return CloudStatus
+     */
+    virtual CloudStatus renewToken(const CloudConfig& config, std::string& token, std::string& refreshToken) = 0;
 
     /**
      * \~english

@@ -1,7 +1,11 @@
-cmake_minimum_required(VERSION 3.23.1 FATAL_ERROR)
+# cmake-format: off
+# CMake 3.14 fixes propagation of object library linking
+# Cmake 3.24 dependency providers (helps with Conan find_package integration)
+# cmake-format: on
+cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
 
 # conanfile.py parses next line to determine version which feeds the version to everything
-set(DFX_CLOUD_LIBRARY_VERSION 1.3.1)
+set(DFX_CLOUD_LIBRARY_VERSION 2.0.0)
 
 project(
   dfxcloud
@@ -33,17 +37,25 @@ set(MEASUREMENT_ONLY
     CACHE BOOL "Build with ONLY support to perform measurement (smaller library)")
 
 set(WITH_GRPC
-    TRUE
+    FALSE
     CACHE BOOL "Build with gRPC support")
-set(WITH_CURL
+
+# If building for Emscripten curl is unavailable
+if(NOT EMSCRIPTEN)
+  set(WITH_CURL TRUE CACHE BOOL "Build with curl support")
+  set(WITH_REST TRUE CACHE BOOL "Build with REST support")
+else()
+  set(WITH_CURL FALSE CACHE BOOL "Build with curl support" FORCE)
+  set(WITH_REST FALSE CACHE BOOL "Build with REST support" FORCE)
+endif()
+
+set(WITH_WEBSOCKET_PROTOBUF
+    FALSE
+    CACHE BOOL "Buidl with WebSocket Protobuf support")
+set(WITH_WEBSOCKET_JSON
     TRUE
-    CACHE BOOL "Build with curl support")
-set(WITH_REST
-    TRUE
-    CACHE BOOL "Build with REST support")
-set(WITH_WEBSOCKET
-    TRUE
-    CACHE BOOL "Build with WebSocket support")
+    CACHE BOOL "Build with WebSocket JSON support")
+
 set(WITH_VALIDATORS
     TRUE
     CACHE BOOL "Build with Validation support")
@@ -68,7 +80,7 @@ set(DOC_LANGUAGE
     CACHE STRING "Language to build documentation for: english, chinese")
 
 set(WITH_CLANG_FORMAT
-    FALSE
+    TRUE
     CACHE BOOL "Enable clang format targets")
 
 set(ENABLE_CHECKS
@@ -132,15 +144,16 @@ add_subdirectory(api-cpp-validator)
 add_subdirectory(api-cpp-grpc)
 add_subdirectory(api-cpp-rest)
 add_subdirectory(websocket) # Provide an implementation for api-cpp-websockets to use
-add_subdirectory(api-cpp-websocket)
+add_subdirectory(api-cpp-websocket-protobuf)
+add_subdirectory(api-cpp-websocket-json)
 add_subdirectory(doc)
 
 add_library(dfxcloud "")
 add_library(DFXCloud::dfxcloud ALIAS dfxcloud)
 
-if(WITH_DFXCLI)
+if(WITH_DFXCLI AND NOT CMAKE_CROSSCOMPILING)
   add_subdirectory(tool-dfxcli)
-endif(WITH_DFXCLI)
+endif(WITH_DFXCLI AND NOT CMAKE_CROSSCOMPILING)
 
 if(WITH_TESTS)
   add_subdirectory(test)
@@ -161,8 +174,10 @@ target_link_libraries(
           $<$<BOOL:${WITH_GRPC}>:$<TARGET_OBJECTS:api-protos-grpc>>
           $<$<BOOL:${WITH_GRPC}>:$<TARGET_OBJECTS:api-cpp-grpc>>
           $<$<BOOL:${WITH_REST}>:$<TARGET_OBJECTS:api-cpp-rest>>
-          $<$<BOOL:${WITH_WEBSOCKET}>:$<TARGET_OBJECTS:api-cpp-websocket>>
-          $<$<BOOL:${WITH_WEBSOCKET}>:$<TARGET_OBJECTS:websocket>>)
+          $<$<BOOL:${WITH_WEBSOCKET_PROTOBUF}>:$<TARGET_OBJECTS:api-cpp-websocket-protobuf>>
+          $<$<BOOL:${WITH_WEBSOCKET_JSON}>:$<TARGET_OBJECTS:api-cpp-websocket-json>>
+          $<$<OR:$<BOOL:${WITH_WEBSOCKET_PROTOBUF}>,$<BOOL:${WITH_WEBSOCKET_JSON}>>:$<TARGET_OBJECTS:websocket>>
+)
 
 # When not including gRPC, Undefined symbols for architecture arm64: "_CFRelease", referenced from:
 # _Curl_resolv in libcurl.a(libcurl_la-hostip.o)
@@ -274,20 +289,26 @@ message(STATUS "----------------------")
 message(STATUS "")
 message(STATUS "    Target Host:  ${CMAKE_SYSTEM_NAME}, Arch: ${CMAKE_SYSTEM_PROCESSOR}")
 message(STATUS "    CXX COMPILER: ${CMAKE_CXX_COMPILER}    (${CMAKE_CXX_COMPILER_VERSION})")
+message(STATUS "    CMAKE_PROJECT_TOP_LEVEL_INCLUDES: ${CMAKE_PROJECT_TOP_LEVEL_INCLUDES}")
 message(STATUS "    CMAKE_TOOLCHAIN_FILE: ${CMAKE_TOOLCHAIN_FILE}")
 message(STATUS "    CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "")
 message(STATUS "    BUILD_TYPE=${CMAKE_BUILD_TYPE}")
 message(STATUS "    SHARED_LIBS=${BUILD_SHARED_LIBS}")
 message(STATUS "")
+message(STATUS "    MEASUREMENT_ONLY=${MEASUREMENT_ONLY}")
 message(STATUS "    WITH_CURL=${WITH_CURL}")
-message(STATUS "    WITH_REST=${WITH_REST}")
-message(STATUS "    WITH_WEBSOCKET=${WITH_WEBSOCKET}")
 message(STATUS "    WITH_GRPC=${WITH_GRPC}")
+message(STATUS "    WITH_REST=${WITH_REST}")
+message(STATUS "    WITH_WEBSOCKET_JSON=${WITH_WEBSOCKET_JSON}")
+message(STATUS "    WITH_WEBSOCKET_PROTOBUF=${WITH_WEBSOCKET_PROTOBUF}")
 message(STATUS "    WITH_VALIDATORS=${WITH_VALIDATORS}")
 message(STATUS "")
 message(STATUS "    WITH_YAML=${WITH_YAML}")
 message(STATUS "")
+message(STATUS "    WITH_DFXCLI=${WITH_DFXCLI}")
+message(STATUS "")
+message(STATUS "    ENABLE_CHECKS=${ENABLE_CHECKS}")
 message(STATUS "    WITH_DOCS=${WITH_DOCS}  (${DOC_LANGUAGE})")
 message(STATUS "    WITH_TESTS=${WITH_TESTS}")
 message(STATUS "")

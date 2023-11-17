@@ -72,7 +72,7 @@ void dfx::api::cloudLogSetLevel(int logLevel)
 void dfx::api::cloudLog(uint8_t level, const char* format, ...)
 {
     if (cloudLogLevel() >= level) {
-        char buffer[2048];
+        char buffer[1024*100];
         va_list args;
         va_start(args, format);
         vsnprintf(buffer, sizeof buffer, format, args);

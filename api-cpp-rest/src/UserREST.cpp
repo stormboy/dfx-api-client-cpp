@@ -11,7 +11,6 @@
 
 using namespace dfx::api;
 using namespace dfx::api::rest;
-using nlohmann::json;
 
 UserREST::UserREST(const CloudConfig& config, const std::shared_ptr<CloudREST>& cloudREST) {}
 
@@ -42,7 +41,8 @@ CloudStatus UserREST::create(const CloudConfig& config,
                                      weightKG,
                                      userID));
 
-    json response, request;
+    nlohmann::json request;
+    nlohmann::json response;
 
     request["FirstName"] = firstName;
     request["LastName"] = lastName;
@@ -55,14 +55,14 @@ CloudStatus UserREST::create(const CloudConfig& config,
     request["HeightCm"] = heightCM;
     request["WeightKg"] = weightKG;
 
-    auto status =
+    auto result =
         CloudREST::performRESTCall(config, web::Organizations::CreateUser, config.authToken, {}, request, response);
 
-    if (status.OK()) {
+    if (result.OK()) {
         userID = response["ID"];
     }
 
-    return status;
+    return result;
 }
 
 CloudStatus UserREST::list(const CloudConfig& config,
@@ -77,77 +77,42 @@ CloudStatus UserREST::list(const CloudConfig& config,
 CloudStatus UserREST::retrieve(const CloudConfig& config, User& user)
 {
     DFX_CLOUD_VALIDATOR_MACRO(UserValidator, retrieve(config, user));
-    json response, request;
-    auto status = CloudREST::performRESTCall(config, web::Users::Retrieve, config.authToken, {}, request, response);
-    if (status.OK()) {
+
+    nlohmann::json request;
+    nlohmann::json response;
+
+    auto result = CloudREST::performRESTCall(config, web::Users::Retrieve, config.authToken, {}, request, response);
+    if (result.OK()) {
         user = response;
     }
 
-    return status;
+    return result;
 }
 
 CloudStatus UserREST::update(const CloudConfig& config, const User& user)
 {
     DFX_CLOUD_VALIDATOR_MACRO(UserValidator, update(config, user));
 
-    json response, request;
+    nlohmann::json request;
+    nlohmann::json response;
+
     request = user;
-    auto status = CloudREST::performRESTCall(config, web::Users::Update, config.authToken, {}, request, response);
+    auto result = CloudREST::performRESTCall(config, web::Users::Update, config.authToken, {}, request, response);
 
-    return status;
-}
-
-CloudStatus
-UserREST::retrieve(const CloudConfig& config, const std::string& userID, const std::string& email, User& user)
-{
-    // Ignore email check for empty, REST call is going to ignore it anyway
-    DFX_CLOUD_VALIDATOR_MACRO(UserValidator, retrieve(config, userID, "email", user));
-    json response, request;
-    auto status = CloudREST::performRESTCall(
-        config, web::Organizations::RetrieveUser, config.authToken, {userID}, request, response);
-    if (status.OK()) {
-        user = response;
-    }
-
-    return status;
-}
-
-CloudStatus
-UserREST::update(const CloudConfig& config, const std::string& userID, const std::string& email, const User& user)
-{
-    // Ignore email check for empty, REST call is going to ignore it anyway
-    DFX_CLOUD_VALIDATOR_MACRO(UserValidator, update(config, userID, "email", user));
-
-    json response, request;
-    request = user;
-    auto status = CloudREST::performRESTCall(
-        config, web::Organizations::UpdateUser, config.authToken, {user.id}, request, response);
-
-    return status;
-}
-
-CloudStatus UserREST::remove(const CloudConfig& config, const std::string& userID, const std::string& email)
-{
-    DFX_CLOUD_VALIDATOR_MACRO(UserValidator, remove(config, userID, email));
-
-    json response, request;
-
-    auto status = CloudREST::performRESTCall(
-        config, web::Organizations::RemoveUser, config.authToken, {userID}, request, response);
-
-    return status;
+    return result;
 }
 
 CloudStatus UserREST::reqLoginCode(const CloudConfig& config, const std::string& sOrgKey, const std::string& sPhoNum)
 {
     DFX_CLOUD_VALIDATOR_MACRO(UserValidator, reqLoginCode(config, sOrgKey, sPhoNum));
 
-    json response, request;
+    nlohmann::json request;
+    nlohmann::json response;
 
-    auto status = CloudREST::performRESTCall(
+    auto result = CloudREST::performRESTCall(
         config, web::Users::RequestLoginCode, config.authToken, {sOrgKey, sPhoNum}, request, response);
 
-    return status;
+    return result;
 }
 
 CloudStatus UserREST::loginWithPhoneCode(CloudConfig& config,
@@ -157,38 +122,40 @@ CloudStatus UserREST::loginWithPhoneCode(CloudConfig& config,
 {
     DFX_CLOUD_VALIDATOR_MACRO(UserValidator, loginWithPhoneCode(config, sOrgKey, sPhoNum, sPhoCode));
 
-    json response, request;
+    nlohmann::json request;
+    nlohmann::json response;
 
     request["LoginCode"] = sPhoCode;
     request["PhoneNumber"] = sPhoNum;
     request["OrgKey"] = sOrgKey;
 
-    auto status =
+    auto result =
         CloudREST::performRESTCall(config, web::Users::LoginWithCode, config.authToken, {}, request, response);
 
-    if (status.OK()) {
+    if (result.OK()) {
         config.authToken = response["Token"];
     }
 
-    return status;
+    return result;
 }
 
 CloudStatus UserREST::retrieveUserRole(const CloudConfig& config, UserRole& userRole)
 {
     DFX_CLOUD_VALIDATOR_MACRO(UserValidator, retrieveUserRole(config, userRole));
 
-    json response, request;
+    nlohmann::json request;
+    nlohmann::json response;
 
-    auto status = CloudREST::performRESTCall(config, web::Users::GetRole, config.authToken, {}, request, response);
+    auto result = CloudREST::performRESTCall(config, web::Users::GetRole, config.authToken, {}, request, response);
 
-    if (status.OK()) {
+    if (result.OK()) {
         userRole.id = response["ID"];
         userRole.name = response["Name"];
         userRole.description = response["Description"];
         userRole.organization = response["Organization"];
     }
 
-    return status;
+    return result;
 }
 
 CloudStatus UserREST::sendPasswordReset(const CloudConfig& config,
@@ -197,7 +164,8 @@ CloudStatus UserREST::sendPasswordReset(const CloudConfig& config,
 {
     DFX_CLOUD_VALIDATOR_MACRO(UserValidator, sendPasswordReset(config, sIdentifier, sResetToken));
 
-    json response, request;
+    nlohmann::json request;
+    nlohmann::json response;
 
     request["Email"] = config.authEmail;
     request["Identifier"] = sIdentifier;
@@ -217,15 +185,16 @@ CloudStatus UserREST::resetPassword(const CloudConfig& config,
 {
     DFX_CLOUD_VALIDATOR_MACRO(UserValidator, resetPassword(config, sPassword, sResetToken));
 
-    json response, request;
+    nlohmann::json request;
+    nlohmann::json response;
 
     request["ResetToken"] = sResetToken;
     request["Password"] = sPassword;
 
-    auto status =
+    auto result =
         CloudREST::performRESTCall(config, web::Users::ResetPassword, config.authToken, {}, request, response);
 
-    return status;
+    return result;
 }
 
 CloudStatus UserREST::sendVerificationCode(const CloudConfig& config,
@@ -234,24 +203,26 @@ CloudStatus UserREST::sendVerificationCode(const CloudConfig& config,
 {
     DFX_CLOUD_VALIDATOR_MACRO(UserValidator, sendVerificationCode(config, sUserID, sOrgKey));
 
-    json response, request;
+    nlohmann::json request;
+    nlohmann::json response;
 
-    auto status = CloudREST::performRESTCall(
+    auto result = CloudREST::performRESTCall(
         config, web::Users::VerificationCode, config.authToken, {sUserID, sOrgKey}, request, response);
 
-    return status;
+    return result;
 }
 
 CloudStatus UserREST::verifyAccount(const CloudConfig& config, const std::string& sUserID, const std::string& sVerCode)
 {
     DFX_CLOUD_VALIDATOR_MACRO(UserValidator, verifyAccount(config, sUserID, sVerCode));
 
-    json response, request;
+    nlohmann::json request;
+    nlohmann::json response;
 
     request["VerificationCode"] = sVerCode;
     request["ID"] = sUserID;
 
-    auto status = CloudREST::performRESTCall(config, web::Users::Verify, config.authToken, {}, request, response);
+    auto result = CloudREST::performRESTCall(config, web::Users::Verify, config.authToken, {}, request, response);
 
-    return status;
+    return result;
 }

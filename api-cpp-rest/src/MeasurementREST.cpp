@@ -6,13 +6,11 @@
 #include "dfx/api/validator/CloudValidator.hpp"
 
 #include "nlohmann/json.hpp"
-#include <fmt/format.h>
 #include <sstream>
 #include <string>
 
 using namespace dfx::api;
 using namespace dfx::api::rest;
-using nlohmann::json;
 
 CloudStatus MeasurementREST::list(const CloudConfig& config,
                                   const std::unordered_map<MeasurementFilter, std::string>& filters,
@@ -23,6 +21,9 @@ CloudStatus MeasurementREST::list(const CloudConfig& config,
     DFX_CLOUD_VALIDATOR_MACRO(MeasurementValidator, list(config, filters, offset, measurements, totalCount));
 
     totalCount = -1; // Return unknown -1, zero would be a literal zero
+
+    nlohmann::json request;
+    nlohmann::json response;
 
     // REST: https://dfxapiversion10.docs.apiary.io/#reference/0/measurements/list
     auto fullObject = false;
@@ -59,10 +60,10 @@ CloudStatus MeasurementREST::list(const CloudConfig& config,
         }
     }
 
-    json response, request;
-    auto status = CloudREST::performRESTCall(
+    // https://dfxapiversion10.docs.apiary.io/#reference/0/measurements/list
+    auto result = CloudREST::performRESTCall(
         config, web::Measurements::List, config.authToken, {}, urlQuery.str(), request, response);
-    if (status.OK()) {
+    if (result.OK()) {
         std::vector<Measurement> partialObjects = response;
 
         if (partialObjects.size() > 0) {
@@ -86,7 +87,8 @@ CloudStatus MeasurementREST::list(const CloudConfig& config,
             return retrieveMultiple(config, measurementIDs, measurements);
         }
     }
-    return status;
+
+    return result;
 }
 
 CloudStatus MeasurementREST::retrieve(const CloudConfig& config,
@@ -95,12 +97,16 @@ CloudStatus MeasurementREST::retrieve(const CloudConfig& config,
 {
     DFX_CLOUD_VALIDATOR_MACRO(MeasurementValidator, retrieve(config, measurementID, measurementData));
 
-    json response, request;
-    auto status = CloudREST::performRESTCall(
+    nlohmann::json request;
+    nlohmann::json response;
+
+    // https://dfxapiversion10.docs.apiary.io/#reference/0/measurements/retrieve
+    auto result = CloudREST::performRESTCall(
         config, web::Measurements::Retrieve, config.authToken, {measurementID}, request, response);
 
-    if (status.OK()) {
+    if (result.OK()) {
         measurementData = response;
     }
-    return status;
+
+    return result;
 }

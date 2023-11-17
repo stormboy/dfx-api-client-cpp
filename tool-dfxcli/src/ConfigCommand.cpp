@@ -30,6 +30,15 @@ DFXExitCode ConfigViewCommand::execute()
     if (!config.authPassword.empty()) {
         response["auth-password"] = (full ? config.authPassword : "OBFUSCATED");
     }
+    if (!config.authMFAToken.empty()) {
+        response["auth-auth-mfa"] = (full ? config.authMFAToken : "OBFUSCATED");
+    }
+    if (!config.deviceRefreshToken.empty()) {
+        response["device-refresh-token"] = (full ? config.deviceRefreshToken : "OBFUSCATED");
+    }
+    if (!config.userRefreshToken.empty()) {
+        response["user-refresh-token"] = (full ? config.userRefreshToken : "OBFUSCATED");
+    }
     if (!config.authOrg.empty()) {
         response["auth-org"] = config.authOrg;
     }

@@ -1,0 +1,5 @@
+include(../build-default)
+
+# The Android build tools only exist on x86_64, force the build arch to be x86_64 and the M1 will fall back to Rosetta
+[settings]
+arch=x86_64

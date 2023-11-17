@@ -41,6 +41,8 @@ protected:
 
     void TearDown() override;
 
+    std::string getTestStudyID(const CloudConfig& config);
+
     std::shared_ptr<dfx::api::CloudAPI> client;
     dfx::api::CloudConfig config;
     std::ostream output;

@@ -1,0 +1,32 @@
+diff --git a/lib/tls/CMakeLists.txt b/lib/tls/CMakeLists.txt
+index a2b78c25..02647e99 100644
+--- a/lib/tls/CMakeLists.txt
++++ b/lib/tls/CMakeLists.txt
+@@ -261,12 +261,15 @@ if (LWS_WITH_SSL)
+ 			set(OPENSSL_INCLUDE_DIRS "${OPENSSL_INCLUDE_DIR}")
+ 		endif()
+ 
++		message("OpenSSL libraries initial: ${OPENSSL_LIBRARIES}")
+ 		if (NOT OPENSSL_FOUND AND NOT LWS_WITH_BORINGSSL)
+ 			# TODO: Add support for STATIC also.
+ 			if (NOT LWS_PLAT_FREERTOS)
+ 				find_package(PkgConfig QUIET)
+ 				pkg_check_modules(PC_OPENSSL openssl QUIET)
++				message("PC_OPENSSL_LIBRARIES=${PC_OPENSSL_LIBRARIES}")
+ 				find_package(OpenSSL REQUIRED)
++				message("PC_OPENSSL_LIBRARIES=${PC_OPENSSL_LIBRARIES}")
+ 				list(APPEND OPENSSL_LIBRARIES ${PC_OPENSSL_LIBRARIES})
+ 				set(OPENSSL_LIBRARIES ${OPENSSL_LIBRARIES} PARENT_SCOPE)
+ 			endif()
+@@ -275,7 +278,11 @@ if (LWS_WITH_SSL)
+ 
+ 		message("OpenSSL include dir: ${OPENSSL_INCLUDE_DIRS}")
+ 		if (NOT LWS_PLAT_FREERTOS)
++		    # /opt/homebrew/Cellar/openssl@3/3.1.1_1/lib/libssl.dylib;/opt/homebrew/Cellar/openssl@3/3.1.1_1/lib/libcrypto.dylib;ssl;crypto
++		    set(OPENSSL_LIBRARIES "/opt/homebrew/Cellar/openssl@3/3.1.1_1/lib/libssl.dylib;/opt/homebrew/Cellar/openssl@3/3.1.1_1/lib/libcrypto.dylib;ssl;crypto")
++		    message("CMAKE_REQUIRED_FLAGS: ${CMAKE_REQUIRED_FLAGS}")
+ 			message("OpenSSL libraries: ${OPENSSL_LIBRARIES}")
++			set(CMAKE_REQUIRED_LINK_OPTIONS "-L/opt/homebrew/Cellar/openssl@3/3.1.1_1/lib")
+ 		endif()
+ 
+ 		if (OPENSSL_INCLUDE_DIRS)

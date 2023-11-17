@@ -19,17 +19,25 @@ UserGetCommand::UserGetCommand(CLI::App* get, std::shared_ptr<Options> options, 
 
 DFXExitCode UserGetCommand::execute()
 {
+    auto organization = client->organization(config);
     auto user = client->user(config);
-    if (!user) {
-        CloudStatus status(CLOUD_UNSUPPORTED_TRANSPORT, "User implementation unavailable");
+    if (!organization) {
+        CloudStatus status(CLOUD_UNSUPPORTED_TRANSPORT, "Organization implementation unavailable");
         outputError(status);
         return DFXExitCode::FAILURE;
     }
 
-    if (operateOnSelf && ids.size() > 0) {
-        CloudStatus status(CLOUD_PARAMETER_VALIDATION_ERROR, "No ids are allowed when operating on self");
-        outputError(status);
-        return DFXExitCode::FAILURE;
+    if (operateOnSelf) {
+        if (!user) {
+            CloudStatus status(CLOUD_UNSUPPORTED_TRANSPORT, "User implementation unavailable");
+            outputError(status);
+            return DFXExitCode::FAILURE;
+        }
+        if (ids.size() > 0) {
+            CloudStatus status(CLOUD_PARAMETER_VALIDATION_ERROR, "No ids are allowed when operating on self");
+            outputError(status);
+            return DFXExitCode::FAILURE;
+        }
     }
 
     // If specified on command line, override the config limit
@@ -45,12 +53,12 @@ DFXExitCode UserGetCommand::execute()
         status = user->retrieve(config, self);
     } else {
         if (ids.size() == 0) {
-            status = user->list(config, {}, offset, users, totalCount);
+            status = organization->listUsers(config, {}, offset, users, totalCount);
         } else {
             for (auto id : ids) {
                 User u;
                 std::string email(""); // How best to specify on CLI?
-                status = user->retrieve(config, id, email, u);
+                status = organization->retrieveUser(config, id, email, u);
                 if (status.OK()) {
                     users.push_back(u);
                 }

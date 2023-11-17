@@ -65,3 +65,34 @@ CloudStatus OrganizationAPI::remove(const CloudConfig& config, const std::string
 {
     return CloudStatus(CLOUD_UNIMPLEMENTED_FEATURE);
 }
+
+CloudStatus OrganizationAPI::listUsers(const CloudConfig& config,
+                              const std::unordered_map<dfx::api::UserAPI::UserFilter, std::string>& filters,
+                              uint16_t offset,
+                              std::vector<User>& users,
+                              int16_t& totalCount) {
+    return CloudStatus(CLOUD_UNIMPLEMENTED_FEATURE);
+}
+
+CloudStatus
+OrganizationAPI::createUser(const CloudConfig& config, User& user)
+{
+    return CloudStatus(CLOUD_UNIMPLEMENTED_FEATURE);
+}
+
+CloudStatus
+OrganizationAPI::retrieveUser(const CloudConfig& config, const std::string& userID, const std::string& email, User& user)
+{
+    return CloudStatus(CLOUD_UNIMPLEMENTED_FEATURE);
+}
+
+CloudStatus
+OrganizationAPI::updateUser(const CloudConfig& config, const std::string& userID, const std::string& email, const User& user)
+{
+    return CloudStatus(CLOUD_UNIMPLEMENTED_FEATURE);
+}
+
+CloudStatus OrganizationAPI::removeUser(const CloudConfig& config, const std::string& userID, const std::string& email)
+{
+    return CloudStatus(CLOUD_UNIMPLEMENTED_FEATURE);
+}

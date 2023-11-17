@@ -1,0 +1,1 @@
+. "/Users/drmacdon/Development/nuralogix/libdfx2/conan/recipes/zulu-openjdk/all/test_package/deactivate_conanbuildenv-armv8.sh"

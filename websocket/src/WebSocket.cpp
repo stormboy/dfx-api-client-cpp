@@ -4,6 +4,7 @@
 #include "dfx/websocket/WebSocket.hpp"
 
 #include <memory>
+#include <stdarg.h> // va_start, va_end
 
 using dfx::websocket::WebSocket;
 using dfx::websocket::WebSocketEvent;

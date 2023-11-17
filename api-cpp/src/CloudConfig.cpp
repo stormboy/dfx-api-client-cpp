@@ -187,6 +187,15 @@ static void loadCloudConfigYAMLContextNode(CloudConfig& config, std::string& ser
     if (node["auth-password"]) {
         config.authPassword = node["auth-password"].as<std::string>();
     }
+    if (node["auth-mfa-token"]) {
+        config.authMFAToken = node["auth-mfa-token"].as<std::string>();
+    }
+    if (node["device-refresh-token"]) {
+        config.deviceRefreshToken = node["device-refresh-token"].as<std::string>();
+    }
+    if (node["user-refresh-token"]) {
+        config.userRefreshToken = node["user-refresh-token"].as<std::string>();
+    }
     if (node["auth-org"]) {
         config.authOrg = node["auth-org"].as<std::string>();
     }
@@ -272,6 +281,9 @@ std::ostream& operator<<(std::ostream& os, const CloudConfig& config)
     }
     if (!config.authPassword.empty()) {
         os << "auth-password=" << config.authPassword << "\n";
+    }
+    if (!config.authMFAToken.empty()) {
+        os << "auth-mfa-token=" << config.authMFAToken << "\n";
     }
     if (!config.authOrg.empty()) {
         os << "auth-org=" << config.authOrg << "\n";

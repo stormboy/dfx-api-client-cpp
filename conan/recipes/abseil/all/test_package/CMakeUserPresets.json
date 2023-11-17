@@ -1,0 +1,9 @@
+{
+    "version": 4,
+    "vendor": {
+        "conan": {}
+    },
+    "include": [
+        "/Users/drmacdon/Development/opensource/conan-center-index/recipes/abseil/all/test_package/build/generators/CMakePresets.json"
+    ]
+}

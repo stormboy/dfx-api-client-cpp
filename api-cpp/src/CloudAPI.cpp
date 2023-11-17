@@ -2,9 +2,14 @@
 // See LICENSE.txt in the project root for license information.
 
 #include "dfx/api/CloudAPI.hpp"
-#include "dfx/api/utils/FileUtils.hpp"
 
-#include "version_info.hpp"
+#ifdef __APPLE__
+#include <TargetConditionals.h>
+#endif
+
+#ifndef TARGET_OS_IPHONE
+#include "dfx/api/utils/FileUtils.hpp"
+#endif
 
 #include <filesystem>
 #include <fmt/format.h>
@@ -19,8 +24,11 @@ namespace fs = std::filesystem;
 #ifdef WITH_REST
 #include "dfx/api/rest/CloudREST.hpp"
 #endif
-#ifdef WITH_WEBSOCKET
-#include "dfx/api/websocket/CloudWebSocket.hpp"
+#ifdef WITH_WEBSOCKET_PROTOBUF
+#include "dfx/api/websocket/protobuf/CloudWebSocketProtobuf.hpp"
+#endif
+#ifdef WITH_WEBSOCKET_JSON
+#include "dfx/api/websocket/json/CloudWebSocketJson.hpp"
 #endif
 
 // using namespace dfx::api;
@@ -41,7 +49,10 @@ using dfx::api::UserAPI;
 const std::string CloudAPI::TRANSPORT_TYPE_REST = "REST";
 
 // NOLINTNEXTLINE(cert-err58-cpp)
-const std::string CloudAPI::TRANSPORT_TYPE_WEBSOCKET = "WEBSOCKET";
+const std::string CloudAPI::TRANSPORT_TYPE_WEBSOCKET_PROTOBUF = "WEBSOCKET_PROTOBUF";
+
+// NOLINTNEXTLINE(cert-err58-cpp)
+const std::string CloudAPI::TRANSPORT_TYPE_WEBSOCKET_JSON = "WEBSOCKET_JSON";
 
 // NOLINTNEXTLINE(cert-err58-cpp)
 const std::string CloudAPI::TRANSPORT_TYPE_GRPC = "GRPC";
@@ -95,13 +106,26 @@ CloudStatus CloudAPI::createInstance(CloudConfig& cloudConfig, std::shared_ptr<C
     }
 #endif
 
-#ifdef WITH_WEBSOCKET
-    if (firstAvailableTransport || desiredTransportType == TRANSPORT_TYPE_WEBSOCKET) {
-        auto instance = std::make_shared<dfx::api::websocket::CloudWebSocket>(config);
+#ifdef WITH_WEBSOCKET_JSON
+    if (firstAvailableTransport || desiredTransportType == TRANSPORT_TYPE_WEBSOCKET_JSON) {
+        auto instance = std::make_shared<dfx::api::websocket::json::CloudWebSocketJson>(config);
         if (instance != nullptr) {
             status = instance->connect(config);
             if (status.OK()) {
-                config.transportType = TRANSPORT_TYPE_WEBSOCKET;
+                config.transportType = TRANSPORT_TYPE_WEBSOCKET_JSON;
+                cloudAPI = instance;
+            }
+        }
+    }
+#endif
+
+#ifdef WITH_WEBSOCKET_PROTOBUF
+    if (firstAvailableTransport || desiredTransportType == TRANSPORT_TYPE_WEBSOCKET_PROTOBUF) {
+        auto instance = std::make_shared<dfx::api::websocket::protobuf::CloudWebSocketProtobuf>(config);
+        if (instance != nullptr) {
+            status = instance->connect(config);
+            if (status.OK()) {
+                config.transportType = TRANSPORT_TYPE_WEBSOCKET_PROTOBUF;
                 cloudAPI = instance;
             }
         }
@@ -125,8 +149,11 @@ std::list<std::string> initializeTransportList()
 #ifdef WITH_REST
     transports.push_back(dfx::api::CloudAPI::TRANSPORT_TYPE_REST);
 #endif
-#ifdef WITH_WEBSOCKET
-    transports.push_back(dfx::api::CloudAPI::TRANSPORT_TYPE_WEBSOCKET);
+#ifdef WITH_WEBSOCKET_JSON
+    transports.push_back(dfx::api::CloudAPI::TRANSPORT_TYPE_WEBSOCKET_JSON);
+#endif
+#ifdef WITH_WEBSOCKET_PROTOBUF
+    transports.push_back(dfx::api::CloudAPI::TRANSPORT_TYPE_WEBSOCKET_PROTOBUF);
 #endif
     return transports;
 }
@@ -215,25 +242,27 @@ std::string CloudAPI::getRootCA(const CloudConfig& config)
 #endif
 #endif
     } else {
+#ifndef TARGET_OS_IPHONE
         // If the user provided a path, load the contents.
         if (rootCA.length() < 255 && fs::exists(rootCA)) {
             auto fileContent = dfx::api::utils::readFile(rootCA.c_str());
             rootCA = std::string(fileContent.begin(), fileContent.end());
         }
+#endif
     }
     return rootCA;
 }
 
 const std::string& CloudAPI::getVersion()
 {
-    static std::string version(_id_versioninfo_dfxcloud());
+    static std::string version; //(_id_versioninfo_dfxcloud());
     return version;
 }
 
 // Obtain the platform the library was compiled for.
 const std::string& CloudAPI::getPlatform()
 {
-    static std::string deviceType(_id_versioninfo_dfxcloud_devicetype());
+    static std::string deviceType; //(_id_versioninfo_dfxcloud_devicetype());
     return deviceType;
 }
 

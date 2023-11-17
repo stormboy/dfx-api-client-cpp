@@ -1,0 +1,7 @@
+include(host-default)
+
+[settings]
+arch=armv8
+
+[options]
+ios-cmake/*:toolchain_target=OS64

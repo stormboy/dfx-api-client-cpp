@@ -100,7 +100,8 @@ TEST_F(MeasurementTests, PerformMeasurement)
         }
     });
 
-    auto status = measurement->setupStream(config, config.studyID);
+    std::string studyID = getTestStudyID(config);
+    auto status = measurement->setupStream(config, studyID);
     if (status.code == CLOUD_UNSUPPORTED_FEATURE) {
         ASSERT_EQ(client->getTransportType(), CloudAPI::TRANSPORT_TYPE_REST) << "REST does not support streams";
         GTEST_SKIP() << status;

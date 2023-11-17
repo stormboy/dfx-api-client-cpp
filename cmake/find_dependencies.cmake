@@ -9,14 +9,15 @@ find_package(nlohmann_json CONFIG REQUIRED) # nlohmann_json::nlohmann_json
 # find_package(cmake CONFIG)
 find_package(fmt CONFIG REQUIRED) # fmt::fmt
 find_package(protobuf CONFIG REQUIRED) # protobuf::protobuf
-find_package(yaml-cpp CONFIG REQUIRED) # yaml-cpp
+find_package(yaml-cpp CONFIG) # yaml-cpp
 if(NOT TARGET yaml-cpp::yaml-cpp)
-  add_library(yaml-cpp::yaml-cpp ALIAS yaml-cpp)
+  if(TARGET yaml-cpp)
+    add_library(yaml-cpp::yaml-cpp ALIAS yaml-cpp)
+  endif()
 endif()
 
 if(WITH_GRPC)
   find_package(OpenSSL CONFIG REQUIRED) # OpenSSL::openssl
-  find_package(absl CONFIG REQUIRED) # abseil::abseil
   find_package(re2 CONFIG REQUIRED) # re2::re2
   find_package(c-ares CONFIG REQUIRED) # c-ares::c-ares
 
@@ -27,10 +28,13 @@ if(WITH_CURL)
   find_package(CURL CONFIG REQUIRED) # CURL::libcurl
 endif(WITH_CURL)
 
-if(WITH_WEBSOCKET)
+if(WITH_WEBSOCKET_JSON OR WITH_WEBSOCKET_PROTOBUF)
   find_package(Libwebsockets CONFIG REQUIRED) # Libwebsockets::libwebsockets
+  if(TARGET websockets)
+    add_library(Libwebsockets::libwebsockets ALIAS websockets)
+  endif()
   find_package(base64 CONFIG REQUIRED) # base64::base64
-endif(WITH_WEBSOCKET)
+endif(WITH_WEBSOCKET_JSON OR WITH_WEBSOCKET_PROTOBUF)
 
 # Handles importing files from the PACKAGE_FOLDERS, analogous to ConanFile::imports() stage. Since the conan
 # imports() is broken for private requirements when using build contexts they are written here.

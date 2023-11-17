@@ -30,9 +30,9 @@ const std::string& CloudValidator::getTransportType()
     return INVALID_TRANSPORT_TYPE;
 }
 
-CloudStatus CloudValidator::getServerStatus(CloudConfig& config)
+CloudStatus CloudValidator::getServerStatus(CloudConfig& config, std::string& response)
 {
-    return CloudStatus(CLOUD_UNSUPPORTED_FEATURE);
+    return CloudStatus(CLOUD_OK);
 }
 
 CloudStatus CloudValidator::login(CloudConfig& config)
@@ -46,6 +46,11 @@ CloudStatus CloudValidator::login(CloudConfig& config)
     return CloudStatus(CLOUD_OK);
 }
 
+CloudStatus CloudValidator::loginWithToken(CloudConfig& config, std::string& token)
+{
+    return CloudStatus(CLOUD_OK);
+}
+
 CloudStatus CloudValidator::logout(CloudConfig& config)
 {
     MACRO_RETURN_ERROR_IF_EMPTY(config.authToken);
@@ -54,7 +59,9 @@ CloudStatus CloudValidator::logout(CloudConfig& config)
 
 CloudStatus CloudValidator::registerDevice(CloudConfig& config,
                                            const std::string& appName,
-                                           const std::string& appVersion)
+                                           const std::string& appVersion,
+                                           const uint16_t tokenExpiresInSeconds,
+                                           const std::string& tokenSubject)
 {
     MACRO_RETURN_ERROR_IF_EMPTY(config.license);
     MACRO_RETURN_ERROR_IF_EMPTY(appName);
@@ -69,11 +76,15 @@ CloudStatus CloudValidator::unregisterDevice(CloudConfig& config)
     return CloudStatus(CLOUD_OK);
 }
 
-CloudStatus CloudValidator::validateToken(const CloudConfig& config, const std::string& userToken)
+CloudStatus CloudValidator::verifyToken(const CloudConfig& config, std::string& response)
 {
     MACRO_RETURN_ERROR_IF_EMPTY(config.license);
     MACRO_RETURN_ERROR_IF_EMPTY(config.authOrg);
-    MACRO_RETURN_ERROR_IF_EMPTY(userToken);
+    return CloudStatus(CLOUD_OK);
+}
+
+CloudStatus CloudValidator::renewToken(const CloudConfig& config, std::string& token, std::string& refreshToken)
+{
     return CloudStatus(CLOUD_OK);
 }
 

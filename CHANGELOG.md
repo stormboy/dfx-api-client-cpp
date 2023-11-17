@@ -1,6 +1,25 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.0.0]
+ - BREAKING: CloudAPI::registerDevice() now takes a tokenExpiresInSeconds, tokenSubject
+ - BREAKING: CloudAPI::validateToken() renamed to verifyToken() with changed parameters
+ - BREAKING: CloudAPI::getServerStatus() now takes a response parameter
+ - BREAKING: Moved User (non-self) retrieve, update, remove to Organization retrieveUser, updateUser, deleteUser
+ - ADDED: listUsers() to Organization
+ - ADDED: createUser() to Organization
+ - Updated to Conan V2 with embedded recipes
+ - Updated build scripts with Just and nushell
+ - Updated library dependencies to recent version supporting Conan V2
+ - Added support for WebSocketJSON format, previous now WebSocketProtobuf
+ - Added support for Token authentication
+ - Added User mfaEnabled and passwordSetDate fields
+ - Added support for new CloudAPI::renewToken()
+ - Added support for new CloudAPI::loginWithToken()
+ - Added support OrganziationGRPC
+ - CloudConfig now contains authMFAToken and deviceRefreshToken, userRefreshToken
+ - Device.remove() now a silent no-op
+
 ## [1.3.1]
  - Fixed bug in WebSocket MeasurementStreamAPI.waitForCompletion when
    timeout was not the default wait forever value.

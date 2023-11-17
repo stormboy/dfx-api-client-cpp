@@ -45,12 +45,12 @@ target_include_directories(
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
          $<BUILD_INTERFACE:$<TARGET_PROPERTY:api-protos-web,INTERFACE_INCLUDE_DIRECTORIES>>
   PRIVATE $<BUILD_INTERFACE:$<TARGET_PROPERTY:api-cpp,INTERFACE_INCLUDE_DIRECTORIES>>
-          $<BUILD_INTERFACE:$<TARGET_PROPERTY:api-cpp-validator,INTERFACE_INCLUDE_DIRECTORIES>>
-          $<BUILD_INTERFACE:$<TARGET_PROPERTY:api-utils,INTERFACE_INCLUDE_DIRECTORIES>>)
+          $<BUILD_INTERFACE:$<TARGET_PROPERTY:api-cpp-validator,INTERFACE_INCLUDE_DIRECTORIES>>)
 
 set_target_properties(api-cpp-rest PROPERTIES CXX_VISIBILITY_PRESET hidden)
 
-target_link_libraries(api-cpp-rest PRIVATE api-protos-web $<$<NOT:$<PLATFORM_ID:Emscripten>>:CURL::libcurl>
-                                           fmt::fmt nlohmann_json::nlohmann_json)
+target_link_libraries(
+  api-cpp-rest PRIVATE api-protos-web $<$<NOT:$<PLATFORM_ID:Emscripten>>:CURL::libcurl> fmt::fmt
+                       nlohmann_json::nlohmann_json openssl::openssl $<$<TARGET_EXISTS:api-utils>:api-utils>)
 
 install(TARGETS api-cpp-rest PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dfx/api/rest)

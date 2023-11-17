@@ -6,12 +6,11 @@
 #include "dfx/api/validator/CloudValidator.hpp"
 
 #include "nlohmann/json.hpp"
-#include <fmt/format.h>
+#include <sstream>
 #include <string>
 
 using namespace dfx::api;
 using namespace dfx::api::rest;
-using nlohmann::json;
 
 CloudStatus DeviceREST::create(const CloudConfig& config,
                                const std::string& name,
@@ -22,16 +21,19 @@ CloudStatus DeviceREST::create(const CloudConfig& config,
 {
     DFX_CLOUD_VALIDATOR_MACRO(DeviceValidator, create(config, name, type, identifier, version, device));
 
-    json response, request = {{"Name", name},
+    nlohmann::json request = {{"Name", name},
                               {"DeviceTypeID", DeviceTypeMapper::toString.at(type)},
                               {"Identifier", identifier},
                               {"Version", version}};
-    auto status = CloudREST::performRESTCall(config, web::Devices::Create, config.authToken, {}, request, response);
-    if (status.OK()) {
+    nlohmann::json response;
+
+    auto result = CloudREST::performRESTCall(config, web::Devices::Create, config.authToken, {}, request, response);
+    if (result.OK()) {
         std::string deviceID = response["ID"].get<std::string>();
         return retrieve(config, deviceID, device);
     }
-    return status;
+
+    return result;
 }
 
 CloudStatus DeviceREST::list(const CloudConfig& config,
@@ -45,44 +47,46 @@ CloudStatus DeviceREST::list(const CloudConfig& config,
     totalCount = -1; // Return unknown -1, zero would be a literal zero
 
     // REST: https://dfxapiversion10.docs.apiary.io/#reference/0/devices/list
-    auto fullObject = false;
     std::stringstream urlQuery;
     urlQuery << "Offset=" << offset << "&Limit=" << config.listLimit;
     for (auto& filter : filters) {
         switch (filter.first) {
-            case DeviceFilter::StatusID:
+            case DeviceFilter::Date:
                 urlQuery << "&Date=" << filter.second;
                 break;
-            case DeviceFilter::Unique:
+            case DeviceFilter::EndDate:
                 urlQuery << "&EndDate=" << filter.second;
                 break;
-            case DeviceFilter::DeviceTypeID:
-                urlQuery << "&UserProfileID=" << filter.second;
-                break;
             case DeviceFilter::Name:
-                urlQuery << "&UserProfileName=" << filter.second;
+                urlQuery << "&Name=" << filter.second;
                 break;
             case DeviceFilter::Version:
-                urlQuery << "&StudyID=" << filter.second;
+                urlQuery << "&Version=" << filter.second;
                 break;
-            case DeviceFilter::Date:
+            case DeviceFilter::StatusID:
                 urlQuery << "&StatusID=" << filter.second;
                 break;
-            case DeviceFilter::EndDate:
-                urlQuery << "&PartnerID=" << filter.second;
+            case DeviceFilter::DeviceTypeID:
+                urlQuery << "&DeviceTypeID=" << filter.second;
                 break;
-            case DeviceFilter::FullObject:
-                fullObject = true;
+            case DeviceFilter::LicenseID:
+                urlQuery << "&LicenseID=" << filter.second;
+                break;
+            case DeviceFilter::SortOrder:
+                urlQuery << "&SortOrder=" << filter.second;
                 break;
             default:
                 return CloudStatus(CLOUD_PARAMETER_VALIDATION_ERROR, "Unexpected list filter key");
         }
     }
 
-    json response, request;
-    auto status =
+    nlohmann::json request;
+    nlohmann::json response;
+
+    // https://dfxapiversion10.docs.apiary.io/#reference/0/devices/list
+    auto result =
         CloudREST::performRESTCall(config, web::Devices::List, config.authToken, {}, urlQuery.str(), request, response);
-    if (status.OK()) {
+    if (result.OK()) {
         std::vector<Device> devices = response;
 
         // Append everything we just read to the deviceList
@@ -97,29 +101,36 @@ CloudStatus DeviceREST::list(const CloudConfig& config,
         }
     }
 
-    return status;
+    return result;
 }
 
-CloudStatus DeviceREST::retrieve(const CloudConfig& config, const std::string& deviceID, Device& deviceInfo)
+CloudStatus DeviceREST::retrieve(const CloudConfig& config, const std::string& deviceID, Device& device)
 {
     DFX_CLOUD_VALIDATOR_MACRO(DeviceValidator, retrieve(config, deviceID, deviceInfo));
 
-    json response, request;
-    auto status =
+    nlohmann::json request;
+    nlohmann::json response;
+
+    // https://dfxapiversion10.docs.apiary.io/#reference/0/devices/retrieve
+    auto result =
         CloudREST::performRESTCall(config, web::Devices::Retrieve, config.authToken, {deviceID}, request, response);
 
-    if (status.OK()) {
-        deviceInfo = response;
-        deviceInfo.id = deviceID;
+    if (result.OK()) {
+        device = response;
+        device.id = deviceID;
     }
-    return status;
+
+    return result;
 }
 
 CloudStatus DeviceREST::update(const CloudConfig& config, const Device& device)
 {
     DFX_CLOUD_VALIDATOR_MACRO(DeviceValidator, update(config, device));
 
-    json response, request = device;
+    nlohmann::json request = device;
+    nlohmann::json response;
+
+    // https://dfxapiversion10.docs.apiary.io/#reference/0/devices/update
     return CloudREST::performRESTCall(config, web::Devices::Update, config.authToken, {device.id}, request, response);
 }
 
@@ -127,6 +138,7 @@ CloudStatus DeviceREST::remove(const CloudConfig& config, const std::string& dev
 {
     DFX_CLOUD_VALIDATOR_MACRO(DeviceValidator, remove(config, deviceID));
 
-    json response, request;
+    nlohmann::json request;
+    nlohmann::json response;
     return CloudREST::performRESTCall(config, web::Devices::Remove, config.authToken, {deviceID}, request, response);
 }

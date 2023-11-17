@@ -1,0 +1,64 @@
+/*
+ *              Copyright (c) 2016-2019, Nuralogix Corp.
+ *                      All Rights reserved
+ *
+ *      THIS SOFTWARE IS LICENSED BY AND IS THE CONFIDENTIAL AND
+ *      PROPRIETARY PROPERTY OF NURALOGIX CORP. IT IS
+ *      PROTECTED UNDER THE COPYRIGHT LAWS OF THE USA, CANADA
+ *      AND OTHER FOREIGN COUNTRIES. THIS SOFTWARE OR ANY
+ *      PART THEREOF, SHALL NOT, WITHOUT THE PRIOR WRITTEN CONSENT
+ *      OF NURALOGIX CORP, BE USED, COPIED, DISCLOSED,
+ *      DECOMPILED, DISASSEMBLED, MODIFIED OR OTHERWISE TRANSFERRED
+ *      EXCEPT IN ACCORDANCE WITH THE TERMS AND CONDITIONS OF A
+ *      NURALOGIX CORP SOFTWARE LICENSE AGREEMENT.
+ */
+ syntax = "proto3";
+
+ import "dfx/measurements/v2/measurements.proto";
+ 
+ option cc_enable_arenas = true;
+ option java_package = "ai.nuralogix.dfx.measurementresults.v1";
+ option java_outer_classname = "MeasurementResults";
+ option go_package = "bitbucket.org/nuralogix/dfx-protobuffs-go/dfx/measurementresults/v1;measurementresults";
+ option csharp_namespace = "Nuralogix.Dfx.MeasurementResults.V1";
+ 
+ package dfx.measurementresults.v1;
+
+ service API {
+     rpc Retrieve(RetrieveRequest) returns (stream RetrieveResponse) {}
+     rpc Remove(RemoveRequest) returns (RemoveResponse) {}
+     rpc List(ListRequest) returns (ListResponse) {}
+ }
+
+ message RetrieveRequest {
+     //  mandatory field
+     string measurement_id = 1;
+     //  mandatory field
+     string study_id = 2;
+ }
+
+ message RetrieveResponse {
+    dfx.measurements.v2.StreamResponse response = 1;
+ }
+
+ message ListRequest {
+    uint32 limit = 1;
+    uint32 offset = 2;
+ }
+
+ message ListResponse {
+    message ResultsInfo {
+      string measurement_id = 1;
+      string study_id = 2;
+    }
+    repeated ResultsInfo results_infos = 1;
+ }
+
+ message RemoveRequest {
+    //  mandatory field
+    string measurement_id = 1;
+    //  optional
+    string study_id = 2;
+ }
+
+ message RemoveResponse {}

@@ -1,10 +1,15 @@
 # add_definitions(-DWITH_VALIDATORS)
 
 # Use an absolute reference here so that doxygen can locate in the doc context by target
-set(API_UTILS_PUBLIC_HEADERS ${CMAKE_CURRENT_LIST_DIR}/include/dfx/api/utils/HexDump.hpp
-                             ${CMAKE_CURRENT_LIST_DIR}/include/dfx/api/utils/FileUtils.hpp)
+set(API_UTILS_PUBLIC_HEADERS ${CMAKE_CURRENT_LIST_DIR}/include/dfx/api/utils/HexDump.hpp)
 
-add_library(api-utils OBJECT src/HexDump.cpp src/FileUtils.cpp ${API_UTILS_PUBLIC_HEADERS})
+add_library(api-utils OBJECT src/HexDump.cpp ${API_UTILS_PUBLIC_HEADERS})
+
+if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "iOS")
+  # iOS does not implement the std::filesystem APIs
+  target_sources(api-utils PRIVATE src/FileUtils.cpp)
+  list(APPEND API_UTILS_PUBLIC_HEADERS ${CMAKE_CURRENT_LIST_DIR}/include/dfx/api/utils/FileUtils.hpp)
+endif()
 
 set_target_properties(api-utils PROPERTIES DEFINE_SYMBOL "dfxcloud_EXPORTS")
 

@@ -1,0 +1,139 @@
+/*
+ *              Copyright (c) 2016-2019, Nuralogix Corp.
+ *                      All Rights reserved
+ *
+ *      THIS SOFTWARE IS LICENSED BY AND IS THE CONFIDENTIAL AND
+ *      PROPRIETARY PROPERTY OF NURALOGIX CORP. IT IS
+ *      PROTECTED UNDER THE COPYRIGHT LAWS OF THE USA, CANADA
+ *      AND OTHER FOREIGN COUNTRIES. THIS SOFTWARE OR ANY
+ *      PART THEREOF, SHALL NOT, WITHOUT THE PRIOR WRITTEN CONSENT
+ *      OF NURALOGIX CORP, BE USED, COPIED, DISCLOSED,
+ *      DECOMPILED, DISASSEMBLED, MODIFIED OR OTHERWISE TRANSFERRED
+ *      EXCEPT IN ACCORDANCE WITH THE TERMS AND CONDITIONS OF A
+ *      NURALOGIX CORP SOFTWARE LICENSE AGREEMENT.
+ */
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+option cc_enable_arenas = true;
+option java_package = "ai.nuralogix.dfx.users.v2";
+option java_outer_classname = "Users";
+option go_package = "bitbucket.org/nuralogix/dfx-protobuffs-go/dfx/users/v2;users";
+option csharp_namespace = "Nuralogix.Dfx.Users.V2";
+
+package dfx.users.v2;
+
+service API {
+  rpc Create (CreateRequest) returns (CreateResponse) {
+    option (google.api.http) = {
+      post: "/api/v2/users"
+      body: "*"
+    };
+  }
+  rpc Remove (RemoveRequest) returns (RemoveResponse) {
+    option (google.api.http) = {
+      delete: "/api/v2/users"
+    };
+  }
+  rpc List (ListRequest) returns (ListResponse) {
+     option (google.api.http) = {
+      get: "/api/v2/users/list"
+    };
+  }
+  rpc Retrieve (RetrieveRequest) returns (RetrieveResponse) {
+    option (google.api.http) = {
+      get: "/api/v2/users"
+    };
+  }
+  rpc Update (UpdateRequest) returns (UpdateResponse) {
+    option (google.api.http) = {
+      patch: "/api/v2/users"
+      body: "*"
+    };
+  }
+}
+
+enum Status {
+  UNKNOWN_USER_STATUS = 0;
+  ACTIVE = 1;
+  INACTIVE = 2;
+  DELETED = 3;
+}
+ 
+// Create
+message CreateRequest {
+  string email = 1;
+  string role = 2;
+  string password = 3;
+}
+message CreateResponse {
+  string id = 1;
+  // Do not use (temporarily for creating a user in local-server)
+  string password = 2 [deprecated = true];
+}
+
+// Remove
+message RemoveRequest { // if both id and email fields are provided, api will validate on both.
+  string id = 1;
+  string email = 2;
+}
+message RemoveResponse {}
+
+// List
+message ListRequest {
+  uint32 limit = 1;
+  uint32 offset = 2;
+}
+message ListResponse {
+  message User {
+    string id = 1;
+    string email = 2;
+    string first_name = 3;
+    string last_name = 4;
+    Status status = 5;
+  }
+  uint32 total = 1;
+  repeated User users = 2;
+}
+
+ // Retrieve
+message RetrieveRequest { // if both id and email fields are provided, api will validate on both.
+  string id = 1;
+  string email = 2;
+}
+message RetrieveResponse {
+  message User {
+    string id = 1;
+    string first_name = 2;
+    string last_name = 3;
+    string email = 4;
+    string gender = 5;
+    Status status = 6;
+    uint32 height_cm = 7;
+    uint32 weight_kg = 8;
+    string avatar_uri = 9;
+    google.protobuf.Timestamp date_of_birth = 10;
+    google.protobuf.Timestamp created = 11;
+    google.protobuf.Timestamp updated = 12;
+  }
+  User user = 1;
+}
+
+// Update
+message UpdateRequest {
+  string id = 1;
+  string email = 2;
+  string first_name = 3;
+  string last_name = 4;
+  string gender = 5;
+  Status status = 6;
+  uint32 height_cm = 7;
+  uint32 weight_kg = 8;
+  string avatar_uri = 9;
+  string password = 10;
+  string role = 11;
+  google.protobuf.Timestamp date_of_birth = 12;
+}
+message UpdateResponse {}

@@ -7,13 +7,11 @@
 #include "dfx/api/web/WebServiceDetail.hpp"
 
 #include "nlohmann/json.hpp"
-#include <fmt/format.h>
 #include <sstream>
 #include <string>
 
 using namespace dfx::api;
 using namespace dfx::api::rest;
-using nlohmann::json;
 
 CloudStatus StudyREST::create(const CloudConfig& config,
                               const std::string& name,
@@ -24,7 +22,8 @@ CloudStatus StudyREST::create(const CloudConfig& config,
 {
     DFX_CLOUD_VALIDATOR_MACRO(StudyValidator, create(config, name, description, templateID, studyConfig, studyID));
 
-    json response, request;
+    nlohmann::json request;
+    nlohmann::json response;
 
     request["Name"] = name;
     request["Description"] = description;
@@ -35,11 +34,12 @@ CloudStatus StudyREST::create(const CloudConfig& config,
         it++;
     };
 
-    auto status = CloudREST::performRESTCall(config, web::Studies::Create, config.authToken, {}, request, response);
-    if (status.OK()) {
+    // https://dfxapiversion10.docs.apiary.io/#reference/0/studies/create
+    auto result = CloudREST::performRESTCall(config, web::Studies::Create, config.authToken, {}, request, response);
+    if (result.OK()) {
         studyID = response["ID"].get<std::string>();
     }
-    return status;
+    return result;
 }
 
 CloudStatus StudyREST::list(const CloudConfig& config,
@@ -56,10 +56,13 @@ CloudStatus StudyREST::list(const CloudConfig& config,
         return CloudStatus(CLOUD_PARAMETER_VALIDATION_ERROR, "Unsupported filter provided");
     }
 
-    json response, request;
-    auto restStatus = CloudREST::performRESTCall(config, web::Studies::List, config.authToken, {}, request, response);
+    nlohmann::json request;
+    nlohmann::json response;
 
-    if (restStatus.OK()) {
+    // https://dfxapiversion10.docs.apiary.io/#reference/0/studies/list
+    auto result = CloudREST::performRESTCall(config, web::Studies::List, config.authToken, {}, request, response);
+
+    if (result.OK()) {
         const auto numberStudies = response.size();
         if (numberStudies == 0) {
             // It is possible with offset/limit to have no studies - but calling retrieveMultiple with an
@@ -83,17 +86,21 @@ CloudStatus StudyREST::list(const CloudConfig& config,
         return retrieveMultiple(config, studyIDs, studies);
     }
 
-    return restStatus;
+    return result;
 }
 
 CloudStatus StudyREST::retrieve(const CloudConfig& config, const std::string& studyID, Study& study)
 {
     DFX_CLOUD_VALIDATOR_MACRO(StudyValidator, retrieve(config, studyID, study));
-    json response, request;
-    auto restStatus =
+
+    nlohmann::json request;
+    nlohmann::json response;
+
+    // https://dfxapiversion10.docs.apiary.io/#reference/0/studies/retrieve
+    auto result =
         CloudREST::performRESTCall(config, web::Studies::Retrieve, config.authToken, {studyID}, request, response);
 
-    if (restStatus.OK()) {
+    if (result.OK()) {
         study = response;
     }
 
@@ -130,24 +137,25 @@ CloudStatus StudyREST::update(const CloudConfig& config,
                               StudyStatus status)
 {
     DFX_CLOUD_VALIDATOR_MACRO(StudyValidator, update(config, studyID, name, description, status));
-    json response, request = {
-                       {"Name", name},
-                       {"StatusID", StudyStatusMapper::toString.at(status)},
-                       {"Description", description},
-                       {"Config", "{}"} // What is this?
-                   };
-    auto restStatus =
-        CloudREST::performRESTCall(config, web::Studies::Update, config.authToken, {studyID}, request, response);
-    return restStatus;
+
+    nlohmann::json request = {{"Name", name},
+                              {"StatusID", StudyStatusMapper::toString.at(status)},
+                              {"Description", description},
+                              {"Config", "{}"}};
+    nlohmann::json response;
+
+    // https://dfxapiversion10.docs.apiary.io/#reference/0/studies/update
+    return CloudREST::performRESTCall(config, web::Studies::Update, config.authToken, {studyID}, request, response);
 }
 
 CloudStatus StudyREST::remove(const CloudConfig& config, const std::string& studyID)
 {
     DFX_CLOUD_VALIDATOR_MACRO(StudyValidator, remove(config, studyID));
-    json response, request;
-    auto status =
-        CloudREST::performRESTCall(config, web::Studies::Remove, config.authToken, {studyID}, request, response);
-    return status;
+    nlohmann::json request;
+    nlohmann::json response;
+
+    // https://dfxapiversion10.docs.apiary.io/#reference/0/studies/delete
+    return CloudREST::performRESTCall(config, web::Studies::Remove, config.authToken, {studyID}, request, response);
 }
 
 CloudStatus StudyREST::retrieveStudyConfig(const CloudConfig& config,
@@ -159,18 +167,22 @@ CloudStatus StudyREST::retrieveStudyConfig(const CloudConfig& config,
 {
     DFX_CLOUD_VALIDATOR_MACRO(StudyValidator,
                               retrieveStudyConfig(config, studyID, sdkID, currentHashID, studyData, hashID));
-    json response, request = {{"StudyID", studyID}, {"SDKID", sdkID}, {"MD5Hash", currentHashID}};
-    auto status = CloudREST::performRESTCall(config, web::Studies::GetConfig, config.authToken, {}, request, response);
+
+    nlohmann::json request = {{"StudyID", studyID}, {"SDKID", sdkID}, {"MD5Hash", currentHashID}};
+    nlohmann::json response;
+
+    // https://dfxapiversion10.docs.apiary.io/#reference/0/studies/retrieve-sdk-study-config-data
+    auto result = CloudREST::performRESTCall(config, web::Studies::GetConfig, config.authToken, {}, request, response);
     const int HTTP_304_Not_Modified = 304;
-    if (status.OK()) {
+    if (result.OK()) {
         studyData = response["ConfigFile"]["data"].get<std::vector<uint8_t>>();
         hashID = response["MD5Hash"].get<std::string>();
-    } else if (status.getProtocolCode() == HTTP_304_Not_Modified) {
+    } else if (result.getProtocolCode() == HTTP_304_Not_Modified) {
         // This is expected if the currentHashID matched what we were provided.
         hashID = currentHashID;
         return CloudStatus(CLOUD_OK); // HTTP 304 really means everything is OK for this call
     }
-    return status;
+    return result;
 }
 
 CloudStatus StudyREST::retrieveStudyTypes(const CloudConfig& config,
@@ -178,11 +190,15 @@ CloudStatus StudyREST::retrieveStudyTypes(const CloudConfig& config,
                                           std::list<StudyType>& studyTypes)
 {
     DFX_CLOUD_VALIDATOR_MACRO(StudyValidator, retrieveStudyTypes(config, status, studyTypes));
-    json response, request;
-    auto restStatus = CloudREST::performRESTCall(
+
+    nlohmann::json request;
+    nlohmann::json response;
+
+    // https://dfxapiversion10.docs.apiary.io/#reference/0/studies/types
+    auto result = CloudREST::performRESTCall(
         config, web::Studies::Types, config.authToken, {}, StudyStatusMapper::getString(status), request, response);
 
-    if (restStatus.OK()) {
+    if (result.OK()) {
         for (auto& item : response) {
             StudyType studyType;
             studyType.id = item["ID"].get<std::string>();
@@ -202,13 +218,18 @@ CloudStatus StudyREST::listStudyTemplates(const CloudConfig& config,
                                           std::list<StudyTemplate>& studyTemplates)
 {
     DFX_CLOUD_VALIDATOR_MACRO(StudyValidator, listStudyTemplates(config, status, type, studyTemplates));
-    json response, request;
+
+    nlohmann::json request;
+    nlohmann::json response;
+
     std::stringstream urlQuery;
     urlQuery << "Status=" << StudyStatusMapper::toString.at(status) << "&Type" << type;
-    auto restStatus = CloudREST::performRESTCall(
-        config, web::Studies::Templates, config.authToken, {}, urlQuery.str(), request, response);
 
-    if (restStatus.OK()) {
+    // https://dfxapiversion10.docs.apiary.io/#reference/0/studies/list-templates
+    auto result = CloudREST::performRESTCall(
+        config, web::Studies::RetrieveTemplates, config.authToken, {}, urlQuery.str(), request, response);
+
+    if (result.OK()) {
         for (auto& item : response) {
             StudyTemplate studyTemplate;
             studyTemplate.id = item["ID"].get<std::string>();

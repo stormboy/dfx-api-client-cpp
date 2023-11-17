@@ -1,0 +1,38 @@
+include(../host-default)
+
+# New machine setup, install Xcode.app then run:
+#      xcode-select --install
+#      sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+
+# CHANGED: Dec 7, 2022
+# os.version=9.0
+# #ios-cmake:enable_bitcode=False
+
+[settings]
+os=iOS
+os.version=11.0
+os.sdk=iphoneos
+
+[options]
+# https://stackoverflow.com/questions/72543728/xcode-14-deprecates-bitcode-but-why
+# Bitcode will disappear sometime after iOS 14 anyway
+# Default: True
+ios-cmake/*:enable_bitcode=False
+
+# Default: True
+#ios-cmake:enable_arc=False
+
+# Default: False
+#ios-cmake:enable_visbility=True
+
+# Default: False
+#ios-cmake:enable_strict_try_compile=True  
+
+# Default: auto, Options: MAC, MAC_ARM64, MAC_CATALYST, MAC_CATALYST_ARM64, OS, OS64, OS64COMBINED, SIMULATOR, SIMULATOR64, 
+#                         SIMULATORARM64, SIMULATOR_TVOS, SIMULATOR_WATCHOS, TVOS, TVOSCOMBINED, WATCHOS, WATCHOSCOMBINED, auto
+ios-cmake/*:toolchain_target=auto
+
+[tool_requires]
+# ConanCenter: http://github.com/leetal/ios-cmake
+# ios-cmake/4.2.0 has a bug in the toolchain file during find_package it accidentally clears the ios flag, which kills OpenCV build
+ios-cmake/4.3.0            

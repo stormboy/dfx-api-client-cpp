@@ -30,9 +30,16 @@
 
 using namespace dfx::api;
 using namespace dfx::api::rest;
-using nlohmann::json;
 
 CloudREST::CloudREST(const CloudConfig& config) : CloudAPI(config) {}
+
+std::string CloudREST::getAuthToken(const CloudConfig& config) {
+    if ( !config.authToken.empty() ) {
+        return config.authToken;
+    } else {
+        return config.deviceToken;
+    }
+}
 
 CloudStatus CloudREST::connect(const CloudConfig& config)
 {
@@ -46,13 +53,42 @@ CloudStatus CloudREST::connect(const CloudConfig& config)
 CloudStatus CloudREST::login(CloudConfig& config)
 {
     DFX_CLOUD_VALIDATOR_MACRO(CloudValidator, login(config));
-    json response,
-        request = {{"Email", config.authEmail}, {"Password", config.authPassword}, {"Identifier", config.authOrg}};
-    auto status = CloudREST::performRESTCall(config, web::Users::Login, config.deviceToken, {}, request, response);
-    if (status.OK()) {
-        config.authToken = response["Token"];
+
+    nlohmann::json request = {
+        {"Email", config.authEmail}, {"Password", config.authPassword}, {"Identifier", config.authOrg}};
+    nlohmann::json response;
+
+    if (!config.authMFAToken.empty()) {
+        request["MFAToken"] = config.authMFAToken;
     }
-    return status;
+
+    // https://dfxapiversion10.docs.apiary.io/#reference/0/users/login
+    auto result = CloudREST::performRESTCall(config, web::Users::Login, config.deviceToken, {}, request, response);
+    if (result.OK()) {
+        config.authToken = response["Token"];
+
+        if (response.contains("RefreshToken")) {
+            config.userRefreshToken = response["RefreshToken"];
+        }
+    }
+    return result;
+}
+
+CloudStatus CloudREST::loginWithToken(CloudConfig& config, std::string& token)
+{
+    DFX_CLOUD_VALIDATOR_MACRO(CloudValidator, loginWithToken(config, token));
+
+    nlohmann::json request = {{"Token", token}};
+    nlohmann::json response;
+
+    // https://dfxapiversion10.docs.apiary.io/#reference/0/organizations/login-with-token
+    auto result = CloudREST::performRESTCall(
+        config, web::Organizations::LoginWithToken, config.deviceToken, {}, request, response);
+    if (result.OK()) {
+        token = response["Token"];
+    }
+
+    return result;
 }
 
 // REST does not have a logout for users - so calling can't fail
@@ -62,43 +98,89 @@ CloudStatus CloudREST::logout(CloudConfig& config)
     return CloudStatus(CLOUD_OK);
 }
 
-CloudStatus CloudREST::registerDevice(CloudConfig& config, const std::string& appName, const std::string& appVersion)
+CloudStatus CloudREST::registerDevice(CloudConfig& config,
+                                      const std::string& appName,
+                                      const std::string& appVersion,
+                                      const uint16_t tokenExpiresInSeconds,
+                                      const std::string& tokenSubject)
 {
     DFX_CLOUD_VALIDATOR_MACRO(CloudValidator, registerDevice(config, appName, appVersion));
     auto deviceType = CloudAPI::getPlatform();
     deviceType = "LINUX";
 
-    json response, request = {{"Key", config.license},
+    nlohmann::json request = {{"Key", config.license},
                               {"DeviceTypeID", deviceType},
                               {"Name", appName},
                               {"Identifier", CloudAPI::getClientIdentifier()},
                               {"Version", appVersion}};
+    nlohmann::json response;
 
-    auto status = CloudREST::performRESTCall(config, web::Organizations::RegisterLicense, "", {}, request, response);
+    if (tokenExpiresInSeconds > 0) {
+        request["TokenExpiresIn"] = tokenExpiresInSeconds;
+    }
+    if (!tokenSubject.empty()) {
+        request["TokenSubject"] = tokenSubject;
+    }
 
-    if (status.OK()) {
+    // https://dfxapiversion10.docs.apiary.io/#reference/0/organizations/register-license
+    auto result = CloudREST::performRESTCall(config, web::Organizations::RegisterLicense, "", {}, request, response);
+
+    if (result.OK()) {
         config.deviceID = response["DeviceID"];
         config.deviceToken = response["Token"];
+        if (response.contains("RefreshToken")) {
+            config.deviceRefreshToken = response["RefreshToken"];
+        }
         // auto roleID = response["RoleID"];
         // auto userID = response["UserID"];
     }
-    return status;
+    return result;
 }
 
 CloudStatus CloudREST::unregisterDevice(CloudConfig& config)
 {
     DFX_CLOUD_VALIDATOR_MACRO(CloudValidator, unregisterDevice(config));
-    json response, request;
-    auto status = CloudREST::performRESTCall(config, web::Organizations::UnregisterLicense, "", {}, request, response);
-    return status;
+
+    nlohmann::json request;
+    nlohmann::json response;
+
+    // https://dfxapiversion10.docs.apiary.io/#reference/0/organizations/unregister-license
+    auto result = CloudREST::performRESTCall(config, web::Organizations::UnregisterLicense, "", {}, request, response);
+    return result;
 }
 
-CloudStatus CloudREST::validateToken(const CloudConfig& config, const std::string& userToken)
+CloudStatus CloudREST::verifyToken(const CloudConfig& config, std::string& response)
 {
-    DFX_CLOUD_VALIDATOR_MACRO(CloudValidator, validateToken(config, userToken));
-    json response, request;
-    auto status = CloudREST::performRESTCall(config, web::General::VerifyToken, userToken, {}, request, response);
-    return status;
+    DFX_CLOUD_VALIDATOR_MACRO(CloudValidator, verifyToken(config, response));
+
+    nlohmann::json request;
+    nlohmann::json jsonResponse;
+
+    // https://dfxapiversion10.docs.apiary.io/#reference/0/general/verify-token
+    auto result =
+        CloudREST::performRESTCall(config, web::General::VerifyToken, getAuthToken(config), {}, request, jsonResponse);
+    if (result.OK()) {
+        response = jsonResponse.dump();
+    }
+
+    return result;
+}
+
+CloudStatus CloudREST::renewToken(const CloudConfig& config, std::string& token, std::string& refreshToken)
+{
+    DFX_CLOUD_VALIDATOR_MACRO(CloudValidator, renew(config, token, refreshToken));
+
+    nlohmann::json request = {{"Token", token}, {"RefreshToken", refreshToken}};
+    nlohmann::json response;
+
+    // https://dfxapiversion10.docs.apiary.io/#reference/0/auths/renew
+    auto result = CloudREST::performRESTCall(config, web::Auths::RenewToken, config.authToken, {}, request, response);
+    if (result.OK()) {
+        token = response["Token"];
+        refreshToken = response["RefreshToken"];
+    }
+
+    return result;
 }
 
 CloudStatus CloudREST::switchEffectiveOrganization(CloudConfig& config, const std::string& organizationID)
@@ -461,14 +543,17 @@ const std::string& CloudREST::getTransportType()
 //     *	MAINTENANCE		| Offline for maintenance
 //     *	ERROR			| Offline due to an error
 //     *	LATENCY			| API is experience latency or a general slowdown
-CloudStatus CloudREST::getServerStatus(CloudConfig& config)
+CloudStatus CloudREST::getServerStatus(CloudConfig& config, std::string& response)
 {
     // The REST implementation has an end-point available for status that we can hit.
-    json response, request = {};
-    auto status = CloudREST::performRESTCall(config, web::General::Status, config.deviceToken, {}, request, response);
-    if (status.OK()) {
-        auto version = response["Version"];
-        auto status = response["StatusID"];
+    nlohmann::json request;
+    nlohmann::json jsonResponse;
+
+    // https://dfxapiversion10.docs.apiary.io/#reference/0/general/status
+    auto result =
+        CloudREST::performRESTCall(config, web::General::Status, config.deviceToken, {}, request, jsonResponse);
+    if (result.OK()) {
+        response = jsonResponse.dump();
     }
-    return status;
+    return result;
 }

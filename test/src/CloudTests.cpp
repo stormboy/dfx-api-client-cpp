@@ -5,6 +5,8 @@
 
 #include <cstdlib> // for rand/srand
 #include <ctime>   // for time
+#include <thread>
+#include <chrono>
 
 DEFINE_string(config, "~/.dfxcloud.yaml", "Configuration file to use for connection details");
 DEFINE_string(context, "", "Config context to use");
@@ -63,20 +65,28 @@ void CloudTests::SetUp()
     ASSERT_NE(client, nullptr) << "Cloud instance should not be null";
 
     if (config.deviceToken.empty()) {
-        status = client->registerDevice(config, "APITest", "2.0");
-        ASSERT_NE(status.code, CLOUD_TRANSPORT_CLOSED)
-            << "Connection establishment failure on transport: " << config.transportType;
-        ASSERT_EQ(status.code, CLOUD_OK) << status;
-        ASSERT_EQ(config.deviceToken.empty(), false) << "Device Token should not be empty";
-        fixtureDidRegisterDevice = true;
+        if (!config.license.empty()) {
+            auto appName = std::string("APITest");
+            auto appVersion = std::string("2.0");
+            uint16_t tokenExpiresInSeconds = 3600;
+            std::string tokenSubject = ""; // Do not lock the host used for communication
+            auto status = client->registerDevice(config, appName, appVersion, tokenExpiresInSeconds, tokenSubject);
+            ASSERT_NE(status.code, CLOUD_TRANSPORT_CLOSED)
+                << "Connection establishment failure on transport: " << config.transportType;
+            ASSERT_EQ(status.code, CLOUD_OK) << status;
+            ASSERT_EQ(config.deviceToken.empty(), false) << "Device Token should not be empty";
+            fixtureDidRegisterDevice = true;
+        }
     }
     if (config.authToken.empty()) {
-        status = client->login(config);
-        ASSERT_NE(status.code, CLOUD_TRANSPORT_CLOSED)
-            << "Connection establishment failure on transport: " << config.transportType;
-        ASSERT_EQ(status.code, CLOUD_OK) << status;
-        ASSERT_EQ(config.authToken.empty(), false) << "Auth Token should not be empty";
-        fixtureDidLogin = true;
+        if (!config.authPassword.empty()) {
+            status = client->login(config);
+            ASSERT_NE(status.code, CLOUD_TRANSPORT_CLOSED)
+                << "Connection establishment failure on transport: " << config.transportType;
+            ASSERT_EQ(status.code, CLOUD_OK) << status;
+            ASSERT_EQ(config.authToken.empty(), false) << "Auth Token should not be empty";
+            fixtureDidLogin = true;
+        }
     }
 }
 
@@ -101,9 +111,28 @@ void CloudTests::TearDown()
     client = nullptr;
 }
 
+std::string CloudTests::getTestStudyID(const CloudConfig& config)
+{
+    std::string studyID = config.studyID;
+    if (studyID.empty()) {
+        // Need a study ID, so use list to fetch the first we see
+        std::vector<Study> studies;
+        CloudConfig listConfig(config);
+        listConfig.listLimit = 1;
+        int16_t totalCount;
+        auto status = client->study(config)->list(listConfig, {}, 0,
+                                                  studies, totalCount);
+        if ( status.OK() ) {
+            studyID = studies[0].id;
+        }
+    }
+    return studyID;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // CloudAPI TESTS
 ///////////////////////////////////////////////////////////////////////////////
+
 
 // Login performs essentially the same as the Setup/Teardown fixture, but is explicitly
 // designed to just validate we can get the basics and avoid any pre-cached tokens in
@@ -125,16 +154,106 @@ TEST(CloudAPI, login)
     ASSERT_EQ(status.code, CLOUD_OK) << status;
     ASSERT_NE(pClient, nullptr) << "Cloud instance should not be null";
 
-    status = pClient->registerDevice(config, "APITest", "2.0");
+    auto appName = std::string("APITest");
+    auto appVersion = std::string("2.0");
+    uint16_t tokenExpiresInSeconds = 3600;
+    std::string tokenSubject = "";
+    status = pClient->registerDevice(config, appName, appVersion, tokenExpiresInSeconds, tokenSubject);
     ASSERT_EQ(status.code, CLOUD_OK) << status;
     ASSERT_EQ(config.deviceToken.empty(), false) << "Device Token should not be empty";
 
-    status = pClient->login(config);
-    ASSERT_EQ(status.code, CLOUD_OK) << status;
-    ASSERT_EQ(config.authToken.empty(), false) << "Auth Token should not be empty";
+    if (!config.authPassword.empty()) {
+        status = pClient->login(config);
+        ASSERT_EQ(status.code, CLOUD_OK) << status;
+        ASSERT_EQ(config.authToken.empty(), false) << "Auth Token should not be empty";
 
-    status = pClient->logout(config);
+        status = pClient->logout(config);
+        ASSERT_EQ(status.code, CLOUD_OK) << status;
+    }
+
+    // REST fails with RESTRICTED_ACCESS, skip if REST
+    // WebSocket fails also, so preform only if GRPC
+    if (config.transportType.compare(CloudAPI::TRANSPORT_TYPE_GRPC) == 0) {
+        status = pClient->unregisterDevice(config);
+        ASSERT_EQ(status.code, CLOUD_OK) << status;
+    }
+}
+
+TEST(CloudAPI, verifyToken)
+{
+    CloudConfig config;
+    auto status = dfx::api::loadCloudConfig(config, FLAGS_config);
     ASSERT_EQ(status.code, CLOUD_OK) << status;
+
+    // We are testing the authentication cycle, clear the loaded tokens to test we are able
+    // to register and login
+    config.deviceToken = "";
+    config.authToken = "";
+
+    std::shared_ptr<CloudAPI> pClient;
+    status = CloudAPI::createInstance(config, pClient);
+    ASSERT_EQ(status.code, CLOUD_OK) << status;
+    ASSERT_NE(pClient, nullptr) << "Cloud instance should not be null";
+
+    auto appName = std::string("APITest");
+    auto appVersion = std::string("2.0");
+    uint16_t tokenExpiresInSeconds = 3600;
+    std::string tokenSubject = "";
+    status = pClient->registerDevice(config, appName, appVersion, tokenExpiresInSeconds, tokenSubject);
+    ASSERT_EQ(status.code, CLOUD_OK) << status;
+    ASSERT_EQ(config.deviceToken.empty(), false) << "Device Token should not be empty";
+
+    std::string response;
+    status = pClient->verifyToken(config, response);
+    if (status.code == CLOUD_UNSUPPORTED_FEATURE) {
+        GTEST_SKIP() << "verifyToken() not supported on transport: " << config.transportType;
+    }
+    ASSERT_EQ(status.code, CLOUD_OK) << status;
+
+    // REST fails with RESTRICTED_ACCESS, skip if REST
+    // WebSocket fails also, so preform only if GRPC
+    if (config.transportType.compare(CloudAPI::TRANSPORT_TYPE_GRPC) == 0) {
+        status = pClient->unregisterDevice(config);
+        ASSERT_EQ(status.code, CLOUD_OK) << status;
+    }
+}
+
+TEST(CloudAPI, renewToken)
+{
+    CloudConfig config;
+    auto status = dfx::api::loadCloudConfig(config, FLAGS_config);
+    ASSERT_EQ(status.code, CLOUD_OK) << status;
+
+    // We are testing the authentication cycle, clear the loaded tokens to test we are able
+    // to register and login
+    config.deviceToken = "";
+    config.authToken = "";
+
+    std::shared_ptr<CloudAPI> pClient;
+    status = CloudAPI::createInstance(config, pClient);
+    ASSERT_EQ(status.code, CLOUD_OK) << status;
+    ASSERT_NE(pClient, nullptr) << "Cloud instance should not be null";
+
+    auto appName = std::string("APITest");
+    auto appVersion = std::string("2.0");
+    uint16_t tokenExpiresInSeconds = 3600;
+    std::string tokenSubject = "";
+    status = pClient->registerDevice(config, appName, appVersion, tokenExpiresInSeconds, tokenSubject);
+    ASSERT_EQ(status.code, CLOUD_OK) << status;
+    ASSERT_EQ(config.deviceToken.empty(), false) << "Device Token should not be empty";
+
+    // Sleep for 1 second to ensure the generate token time is different
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    std::string token = config.deviceToken;
+    std::string refreshToken = config.deviceRefreshToken;
+    status = pClient->renewToken(config, token, refreshToken);
+    if (status.code == CLOUD_UNSUPPORTED_FEATURE) {
+        GTEST_SKIP() << "verifyToken() not supported on transport: " << config.transportType;
+    }
+    ASSERT_EQ(status.code, CLOUD_OK) << status;
+    ASSERT_NE(refreshToken, config.deviceRefreshToken) << "Refresh Token should have changed";
+    ASSERT_NE(token, config.deviceToken) << "Token should have changed";
 
     // REST fails with RESTRICTED_ACCESS, skip if REST
     // WebSocket fails also, so preform only if GRPC

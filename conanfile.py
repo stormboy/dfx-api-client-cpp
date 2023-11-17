@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from conans import ConanFile, MSBuild, tools
-from conans.tools import os_info, SystemPackageTool
-from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps
-from conans.tools import load
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.files import collect_libs, copy, load
+from conan.tools.build import cross_building
+from conan.tools.system.package_manager import Yum
 
 import os, sys, re, subprocess
+import yaml
 
 # https://stackoverflow.com/a/42580137
 def get_base_prefix_compat():
@@ -16,11 +18,11 @@ def in_virtualenv():
 
 def get_version():
     try:
-        content = load("CMakeLists.txt")
+        content = load(os.getcwd(), "CMakeLists.txt")
         version = re.search("set\(DFX_CLOUD_LIBRARY_VERSION (.*)\)", content).group(1)
         return version.strip()
     except Exception as e:
-        print("Exception obtaining version: {}".format(e))
+        #print("Exception obtaining version: {}".format(e))
         return None
 
 class dfxcloud(ConanFile):
@@ -30,10 +32,9 @@ class dfxcloud(ConanFile):
     url = "https://github.com/nuralogix/dfx-api-client-cpp"
     description = "The DFX API facilitates data communication with a DFX Server"
     settings = "os", "compiler", "build_type", "arch"
-    generators = "CMakeDeps", "CMakeToolchain", "versioninfo"
 
-    exports = "requirements.txt", "CMakeLists.txt"
-    keep_imports = True   # Do not delete between build and package
+#    exports = "requirements.txt", "CMakeLists.txt"
+
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -41,7 +42,8 @@ class dfxcloud(ConanFile):
         "with_c_abi": [True, False],
         "with_curl": [True, False],
         "with_grpc": [True, False],
-        "with_websocket": [True, False],
+        "with_websocket_json": [True, False],
+        "with_websocket_protobuf": [True, False],
         "with_rest": [True, False],
         "with_validators": [True, False],
         "with_yaml": [True, False],
@@ -58,8 +60,9 @@ class dfxcloud(ConanFile):
         "measurement_only": False,
         "with_c_abi": True,
         "with_curl": True,
-        "with_grpc": True,
-        "with_websocket": True,
+        "with_grpc": False,
+        "with_websocket_json": True,
+        "with_websocket_protobuf": False,
         "with_rest": True,
         "with_validators": True,
         "with_yaml": True,
@@ -71,12 +74,16 @@ class dfxcloud(ConanFile):
         "enable_checks": False
     }
 
-    scm = {
-        "type": "git",
-        "subfolder": name,
-        "url": url,
-        "revision": "auto"
-    }
+    def export(self):
+        copy(self, "dependencies.yaml", src=self.recipe_folder, dst=self.export_folder)
+
+    def export_sources(self):
+        copy(self, ".*", src=self.recipe_folder, dst=self.export_sources_folder, keep_path=True)  # May need .clang-tidy, etc.
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder, keep_path=True)
+        for folder in ["api-cpp", "api-cpp-grpc", "api-cpp-rest", "api-cpp-validator", "api-cpp-websocket-json",
+                       "api-cpp-websocket-protobuf", "api-protos-grpc", "api-protos-web", "api-utils", "cmake",
+                       "doc", "licenses", "resources", "test", "test_data", "tool-dfxcli", "websocket"]:
+            copy(self, "*", src=os.path.join(self.recipe_folder, folder), dst=os.path.join(self.export_sources_folder, folder), keep_path=True)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -90,6 +97,8 @@ class dfxcloud(ConanFile):
         if self.settings.os == "Macos" and self.options.with_curl:
             self.options["libcurl"].with_ssl = "openssl"
 
+        self.options["libwebsockets"].with_zlib="zlib"
+
         if self.settings.os == "Emscripten":
             self.options.with_curl = False
             self.options.with_grpc = False
@@ -98,15 +107,13 @@ class dfxcloud(ConanFile):
             self.options.with_tests = False
             self.options.with_yaml = False
 
-        if tools.cross_building(self.settings):
+        if cross_building(self):
             self.options.with_docs = False
             self.options.with_tests = False
+            self.options.with_dfxcli = False
 
     def system_requirements(self):
-
-        if os_info.linux_distro == "fedora" or os_info.linux_distro == "centos":
-            installer = SystemPackageTool()
-            installer.install("perl-CPAN")   # Building openssl on Fedora 34 requires Perl module FindBin
+        Yum(self).install(["perl-CPAN"])     # Building openssl on Fedora 34 requires Perl module FindBin
 
         if self.options.with_docs:
             if not in_virtualenv():
@@ -120,17 +127,21 @@ class dfxcloud(ConanFile):
         if not self.options.with_docs:
             del self.options.doc_language
 
+    def _load_dependencies(self):
+        with open(os.path.join(os.path.dirname(__file__), 'dependencies.yaml'), 'r') as file:
+            return yaml.safe_load(file)
+        return {}
+
     def build_requirements(self):
-        # Nuralogix conan repository provided
-        self.build_requires("versioninfo/1.0.4")              # Inject library dependency information
+        deps = self._load_dependencies()
 
         if self.options.with_docs:
-            self.build_requires("doxygen/1.9.2")
-            self.build_requires("protomatlabdoxygen/20200618_2073e51")
+            self.build_requires(f"doxygen/{deps['doxygen']['version']}")
+            self.build_requires(f"protomatlabdoxygen/{deps['protomatlabdoxygen']['20200618_2073e51']}")
 
-        self.build_requires("protobuf/3.20.0")                # Need protoc on build platform
+        self.build_requires(f"protobuf/{deps['protobuf']['version']}")  # Need protoc on build platform
         if self.options.with_grpc:
-            self.build_requires("grpc/1.44.0")                # Need grpc_cpp_plugin on build platform
+            self.build_requires(f"grpc/{deps['grpc']['version']}")  # Need grpc_cpp_plugon on build platform
 
     def requirements(self):
         # The output library strips all shared library symbols for items not in our public
@@ -138,76 +149,56 @@ class dfxcloud(ConanFile):
         # It leaves it open for package consumers to define their own versions without symbol
         # conflicts while importing this package.
 
+        deps = self._load_dependencies()
+
         if self.options.with_tests:
-            self.requires("gtest/1.11.0")
-            self.requires("gflags/2.2.2")
+            self.requires(f"gtest/{deps['gtest']['version']}")
+            self.requires(f"gflags/{deps['gflags']['version']}")
 
         if self.options.with_dfxcli:
-            self.requires("CLI11/2.1.2")
-            self.requires("naturalsort/20210209_5c71f46")
+            self.requires(f"cli11/{deps['cli11']['version']}")
+            self.requires(f"naturalsort/{deps['naturalsort']['version']}")
 
         # Protobuf is a hard requirements to generate sources, not just an override of gRPC
-        self.requires("protobuf/3.20.0")
+        self.requires(f"protobuf/{deps['protobuf']['version']}")
 
         # openssl is used by cmake, libwebsockets, gRPC, etc. they tend to drift and we want the latest
         # so it needs to be explicitly set here as the latest.
-        if self.options.with_grpc or self.options.with_websocket or self.options.with_curl:
-            self.requires("openssl/1.1.1n", override=True)               # Override grpc dependent on 1.1.1h
+        if self.options.with_grpc or self.options.with_websocket_json or \
+                self.options.with_websocket_protobuf or self.options.with_curl:
+            self.requires(f"openssl/{deps['openssl']['version']}", override=True)      # Override grpc dependent on 1.1.1h
 
         if self.options.with_grpc:
-            self.requires("abseil/20211102.0", override=True)
-            self.requires("re2/20220201", override=True)
-            self.requires("meson/0.60.2", override=True)
-            self.requires("c-ares/1.18.1", override=True)
-            self.requires("grpc/1.44.0")
+            self.requires(f"abseil/{deps['abseil']['version']}", override=True)
+            self.requires(f"re2/{deps['re2']['version']}", override=True)
+            self.requires(f"meson/{deps['meson']['version']}", override=True)
+            self.requires(f"c-ares/{deps['c-ares']['version']}", override=True)
+            self.requires(f"grpc/{deps['grpc']['version']}")
 
         if self.options.with_curl:
-            self.requires("libcurl/7.80.0")                   # Fetch rootca from standalone
+            self.requires(f"libcurl/{deps['libcurl']['version']}")            # Fetch rootca from standalone
 
-        if self.options.with_websocket:
-            self.requires("libwebsockets/4.3.0")
-            self.requires("base64/0.4.0")
+        if self.options.with_websocket_json or self.options.with_websocket_protobuf:
+            if self.settings.os != "Emscripten":
+                self.requires(f"libwebsockets/{deps['libwebsockets']['version']}")
+            self.requires(f"base64/{deps['base64']['version']}")
 
         if self.options.with_yaml:
-            self.requires("yaml-cpp/0.7.0")                   # Configuration file handling
+            self.requires(f"yaml-cpp/{deps['yaml-cpp']['version']}")          # Configuration file handling
 
-        self.requires("nlohmann_json/3.10.5")
-        self.requires("fmt/8.1.1")
+        self.requires(f"nlohmann_json/{deps['nlohmann_json']['version']}")
+        self.requires(f"fmt/{deps['fmt']['version']}")
 
         # Nuralogix Conan repository provided
-        self.requires("dfxprotobufspublic/20210805_0094d09")  # gRPC
-        self.requires("dfxprotosweb/20211125_4a907b6")        # REST/WebSocket
-        self.requires("googleapis/20211130_2198f9f")          # For annotations.proto, http.proto
+        self.requires(f"dfxprotobufspublic/{deps['dfxprotobufspublic']['version']}")  # gRPC
+        self.requires(f"dfxprotosweb/{deps['dfxprotosweb']['version']}") # REST/WebSocket
+        self.requires(f"googleapis/{deps['googleapis']['version']}")          # For annotations.proto, http.proto
 
     def imports(self):
         self.copy(pattern="license*", src="licenses", dst="licenses", folder=True, ignore_case=True)
 
     def layout(self):
-        # Currently, there is no nice way to find out what the install folder is so walk the command
-        # line arguments and see if an install folder was passed. When V2 fully lands, this will
-        # hopefully be resolved and will be called the build folder. In the transition, this is the
-        # best option I've found so far.
-        install_folder = None
-        for i, arg in enumerate(sys.argv):
-            if arg.startswith("-if="):
-                install_folder = arg[4:]
-            elif arg.startswith("-if"):
-                install_folder = sys.argv[i+1]
-        if install_folder:
-            self.folders.build = install_folder
-        else:
-            # The default cmake_layout uses "." to identify the source location but when using VS Code
-            # the "." is where VS Code was launch from which is problematic. The best way to do this
-            # is to anchor relative to this conanfile. The build_type is left as-is instead of
-            # dropping to lowercase because VS Code treats it as an environment variable when building
-            # paths which would be impossible to match case. This allows the VS Code Conan Plugin to
-            # define it's JSON profiles with
-            source_path = os.path.dirname(__file__)
-            self.folders.build = os.path.join(source_path, "cmake-build-{}".format(self.settings.build_type))
-
-        self.folders.source = self.name   # Because this package uses scm with subfolder, need to match location
-        self.folders.generators = os.path.join(self.folders.build, "conan")  # Expect to be relative to build location
-        self.folders.imports = self.folders.build   # Want imports to go to present build as they used to
+        cmake_layout(self)
 
     def generate(self):
         toolchain = CMakeToolchain(self)
@@ -215,7 +206,8 @@ class dfxcloud(ConanFile):
         toolchain.variables["MEASUREMENT_ONLY"] = "ON" if self.options.measurement_only else "OFF"
         toolchain.variables["WITH_CURL"] = "ON" if self.options.with_curl else "OFF"
         toolchain.variables["WITH_REST"] = "ON" if self.options.with_rest else "OFF"
-        toolchain.variables["WITH_WEBSOCKET"] = "ON" if self.options.with_websocket else "OFF"
+        toolchain.variables["WITH_WEBSOCKET_JSON"] = "ON" if self.options.with_websocket_json else "OFF"
+        toolchain.variables["WITH_WEBSOCKET_PROTOBUF"] = "ON" if self.options.with_websocket_protobuf else "OFF"
         toolchain.variables["WITH_GRPC"] = "ON" if self.options.with_grpc else "OFF"
         toolchain.variables["WITH_VALIDATORS"] = "ON" if self.options.with_validators else "OFF"
         toolchain.variables["WITH_YAML"] = "ON" if self.options.with_yaml else "OFF"
@@ -243,7 +235,7 @@ class dfxcloud(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = collect_libs(self)
 
         # Generate DFXCloud-config.cmake
         self.cpp_info.set_property("cmake_file_name", "DFXCloud")

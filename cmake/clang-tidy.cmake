@@ -5,11 +5,12 @@ find_program(
   CLANG_TIDY_EXE
   NAMES "clang-tidy"
   DOC "Path to clang-tidy executable"
-  HINTS "/usr/local/opt/llvm/bin" # MacOS brew location
+  HINTS "/usr/local/opt/llvm/bin" # MacOS x86_64 brew location
+        "/opt/homebrew/opt/llvm/bin" # MacOS aarch64 brew location
 )
 
 if(NOT CLANG_TIDY_EXE)
-  message(STATUS "clang-tidy not found.")
+  message(FATAL_ERROR "clang-tidy requested but not found.")
 else()
   message(STATUS "clang-tidy found: ENABLE [${CLANG_TIDY_EXE}]")
   set(DO_CLANG_TIDY "${CLANG_TIDY_EXE}")
@@ -27,8 +28,11 @@ if(CLANG_TIDY_EXE)
     api-cpp-rest PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY};--config-file=${CMAKE_SOURCE_DIR}/.clang-tidy")
 
   set_target_properties(
-    api-cpp-websocket PROPERTIES CXX_CLANG_TIDY
-                                 "${DO_CLANG_TIDY};--config-file=${CMAKE_SOURCE_DIR}/.clang-tidy")
+    api-cpp-websocket-protobuf PROPERTIES CXX_CLANG_TIDY
+                                          "${DO_CLANG_TIDY};--config-file=${CMAKE_SOURCE_DIR}/.clang-tidy")
+  set_target_properties(
+    api-cpp-websocket-json PROPERTIES CXX_CLANG_TIDY
+                                      "${DO_CLANG_TIDY};--config-file=${CMAKE_SOURCE_DIR}/.clang-tidy")
 
   if(WITH_VALIDATORS)
     set_target_properties(

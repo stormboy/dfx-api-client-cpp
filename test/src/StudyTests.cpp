@@ -14,7 +14,6 @@ protected:
         CloudTests::SetUp();
 
         studyID = config.studyID;
-        ;
         sdkID = "4.3.13,3.2.2,Darwin,x86_64";
         currentHashID = "";
     }
@@ -41,7 +40,7 @@ TEST_F(StudyTests, ListStudyTemplates)
     }
 
     // Temporarily, skip this for now, server is returning "INCORRECT_REQUEST" on WebSocket
-    if ((client->getTransportType().compare(CloudAPI::TRANSPORT_TYPE_WEBSOCKET) == 0) &&
+    if ((client->getTransportType().compare(CloudAPI::TRANSPORT_TYPE_WEBSOCKET_PROTOBUF) == 0) &&
         (status.code == CLOUD_PARAMETER_VALIDATION_ERROR)) {
         GTEST_SKIP() << "StudyTests::ListStudyTemplates(): CLOUD_PARAMETER_VALIDATION_ERROR";
     }
@@ -107,6 +106,9 @@ TEST_F(StudyTests, ListStudies)
     int16_t totalCount;
     std::vector<Study> studies;
     auto status = client->study(config)->list(config, {}, 0, studies, totalCount);
+    for (const auto& item : studies) {
+        output << item.id << std::endl;
+    }
     ASSERT_EQ(status.code, CLOUD_OK) << status;
     ASSERT_NE(studies.empty(), true) << "Server should have at least one study";
 }
@@ -115,6 +117,8 @@ TEST_F(StudyTests, RetreiveStudyConfig)
 {
     std::vector<uint8_t> studyData;
     std::string hashID;
+    std::string studyID = getTestStudyID(config);
+
     auto status = client->study(config)->retrieveStudyConfig(config, studyID, sdkID, currentHashID, studyData, hashID);
     if (status.code == CLOUD_UNSUPPORTED_FEATURE) {
         GTEST_SKIP() << status;

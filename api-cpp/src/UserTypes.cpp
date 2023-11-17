@@ -68,6 +68,9 @@ void dfx::api::to_json(nlohmann::json& j, const User& u)
     setJSONFieldIfNotDefault(j, "LoginMethod", u.loginMethod);
     setJSONFieldIfNotDefault(j, "SSOID", u.ssoID);
     setJSONFieldIfNotDefault(j, "Region", u.region);
+
+    setJSONFieldIfNotDefault(j, "PasswordSetDate", u.passwordSetDate);
+    setJSONFieldIfNotDefault(j, "MFAEnabled", u.mfaEnabled);
 }
 
 void dfx::api::from_json(const nlohmann::json& j, User& u)
@@ -104,4 +107,7 @@ void dfx::api::from_json(const nlohmann::json& j, User& u)
     getValidField(j, "LoginMethod", u.loginMethod);
     getValidField(j, "SSOID", u.ssoID);
     getValidField(j, "Region", u.region);
+
+    getValidField(j, "PasswordSetDate", u.passwordSetDate);
+    getValidField(j, "MFAEnabled", u.mfaEnabled);
 }

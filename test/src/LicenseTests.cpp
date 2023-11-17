@@ -24,7 +24,7 @@ TEST_F(LicenseTests, ListLicenses)
     int16_t totalCount;
     std::vector<License> licenses;
     auto status = service->list(config, {}, 0, licenses, totalCount);
-    if (status.code == CLOUD_UNSUPPORTED_FEATURE) {
+    if (status.code == CLOUD_UNSUPPORTED_FEATURE || status.code == CLOUD_USER_NOT_AUTHORIZED) {
         GTEST_SKIP() << status;
     } else {
         ASSERT_EQ(status.code, CLOUD_OK) << status;

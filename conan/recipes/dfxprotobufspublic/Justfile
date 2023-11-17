@@ -1,0 +1,28 @@
+set shell := ['nu', '-c']
+set positional-arguments
+
+export package:="dfxprotobufspublic"
+
+_default:
+    @{{just_executable()}} -f {{justfile()}} --list --unsorted
+
+# Create the package for Conan V2
+build:
+    rm -rf protos; \
+    rm -rf tmp; mkdir tmp; cd tmp; \
+    git clone git@github.com:nuralogix/dfx-protobuffs-public.git; cd dfx-protobuffs-public; git checkout develop; \
+    let date = ( git log -1 --format=%ad --date=format:'%Y%m%d' ); \
+    let revision = ( git rev-parse HEAD | str substring 0..7 ); \
+    let version = ( $date + "_" + $revision ); \
+    ls **/*.proto | get name | each { |e| path dirname } | each { |e| mkdir $"../../protos/($e)" }; \
+    ls **/*.proto | get name | each { |e| cp $e $"../../protos/($e)" }; \
+    cd ..; \
+    cd ..; \
+    ls protos/**/*.proto | get name | each { |e| open $e | str replace -a 'dfx/public/' 'dfx/' | save $e -f }; \
+    ls protos/**/*.proto | get name | each { |e| open $e | str replace -a 'WIN32' 'WIN32_DEPRECATED' | save $e -f }; \
+    echo "#!/bin/sh\n" | save export.sh -f; \
+    echo ( "time conan export . --name " + $env.package + " --version " + $version ) | save export.sh --append -f; \
+    chmod u+x export.sh; \
+    ./export.sh
+
+

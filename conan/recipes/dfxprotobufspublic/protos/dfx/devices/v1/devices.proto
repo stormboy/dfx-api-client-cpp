@@ -1,0 +1,185 @@
+/*
+ *              Copyright (c) 2016-2019, Nuralogix Corp.
+ *                      All Rights reserved
+ *
+ *      THIS SOFTWARE IS LICENSED BY AND IS THE CONFIDENTIAL AND
+ *      PROPRIETARY PROPERTY OF NURALOGIX CORP. IT IS
+ *      PROTECTED UNDER THE COPYRIGHT LAWS OF THE USA, CANADA
+ *      AND OTHER FOREIGN COUNTRIES. THIS SOFTWARE OR ANY
+ *      PART THEREOF, SHALL NOT, WITHOUT THE PRIOR WRITTEN CONSENT
+ *      OF NURALOGIX CORP, BE USED, COPIED, DISCLOSED,
+ *      DECOMPILED, DISASSEMBLED, MODIFIED OR OTHERWISE TRANSFERRED
+ *      EXCEPT IN ACCORDANCE WITH THE TERMS AND CONDITIONS OF A
+ *      NURALOGIX CORP SOFTWARE LICENSE AGREEMENT.
+ */
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+option cc_enable_arenas = true;
+option java_package = "ai.nuralogix.dfx.devices.v1";
+option java_outer_classname = "Devices";
+option go_package = "bitbucket.org/nuralogix/dfx-protobuffs-go/dfx/devices/v1;devices";
+option csharp_namespace = "Nuralogix.Dfx.Devices.V1";
+
+package dfx.devices.v1;
+
+service API {
+  rpc List (ListRequest) returns (ListResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/devices"
+    };
+    option deprecated = true;
+  }
+  rpc Retrieve (RetrieveRequest) returns (RetrieveResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/devices/{id}"
+    };
+  }
+  rpc RetrieveMultiple (RetrieveMultipleRequest) returns (RetrieveMultipleResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/devices/retrieve-multiple"
+      body: "*"
+    };
+    option deprecated = true;
+  }
+  rpc Update (UpdateRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      patch: "/api/v1/devices/{id}"
+      body: "*"
+    };
+    option deprecated = true;
+  }
+  rpc Remove (RemoveRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/api/v1/devices/{id}"  
+    };
+    option deprecated = true;
+  }
+  rpc Register (RegisterRequest) returns (RegisterResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/devices/register"
+      body: "*"
+    };
+    option deprecated = true;
+  }
+  rpc Unregister (UnregisterRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/api/v1/devices/unregister"
+      body: "*"
+    };
+    option deprecated = true;
+  }
+}
+
+enum Status {
+  option deprecated = true;
+  UNKNOWN_DEVICE_STATUS = 0;
+  ACTIVE = 1;
+  INACTIVE = 2;
+  DELETED = 3;
+}
+
+enum Type {
+  option deprecated = true;
+  UNKNOWN_DEVICE_TYPE = 0;
+  IPHONE = 1;
+  ANDROID_PHONE = 2;
+  WIN32_DEPRECATED = 3;
+  DARWIN = 4;
+  IPAD = 5;
+  WINDOWS_TABLET = 6;
+  LINUX = 7;
+  DEBIAN = 8;
+}
+
+// Update
+message UpdateRequest {
+  option deprecated = true;
+  string id = 1;
+  string name = 2;
+  Type device_type = 3;
+  Status status = 4;
+  string identifier = 5;
+  string version = 6;
+}
+
+// List
+message ListRequest {
+  option deprecated = true;
+  uint32 limit = 1;
+  uint32 offset = 2;
+}
+message ListResponse {
+  option deprecated = true;
+  message Device {
+    option deprecated = true;
+    string id = 1;
+    string name = 2;
+  }
+  uint32 total = 1;
+  repeated Device devices = 2;
+}
+
+// Retrieve
+message RetrieveRequest {
+  option deprecated = true;
+  string id = 1;
+}
+message RetrieveResponse {
+  option deprecated = true;
+  Device device = 1;
+}
+
+// RetrieveMultiple
+message RetrieveMultipleRequest {
+  option deprecated = true;
+  repeated string ids = 1;
+}
+message RetrieveMultipleResponse {
+  option deprecated = true;
+  repeated Device devices = 1;
+}
+
+// Remove
+message RemoveRequest {
+  option deprecated = true;
+  string id = 1;
+}
+
+// Register device
+message RegisterRequest {
+  option deprecated = true;
+  string license_key = 1;
+  Type device_type = 2;
+  string name = 3;
+  string identifier = 4;
+  string version = 5;
+}
+message RegisterResponse {
+  option deprecated = true;
+  string device_id = 1;
+  string token = 2;
+}
+
+// Unregister device
+message UnregisterRequest {
+  option deprecated = true;
+  string license_key = 1;
+  string device_id = 2;
+}
+
+// Device object that being used in Retrieve and RetrieveMultiple EPs
+message Device {
+  option deprecated = true;
+  string id = 1;
+  string name = 2;
+  Type device_type = 3;
+  Status status = 4;
+  string identifier = 5;
+  string version = 6;
+  google.protobuf.Timestamp created = 7;
+  google.protobuf.Timestamp updated = 8;
+}

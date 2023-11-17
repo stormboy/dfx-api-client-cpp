@@ -1,0 +1,203 @@
+/*
+ *              Copyright (c) 2016-2019, Nuralogix Corp.
+ *                      All Rights reserved
+ *
+ *      THIS SOFTWARE IS LICENSED BY AND IS THE CONFIDENTIAL AND
+ *      PROPRIETARY PROPERTY OF NURALOGIX CORP. IT IS
+ *      PROTECTED UNDER THE COPYRIGHT LAWS OF THE USA, CANADA
+ *      AND OTHER FOREIGN COUNTRIES. THIS SOFTWARE OR ANY
+ *      PART THEREOF, SHALL NOT, WITHOUT THE PRIOR WRITTEN CONSENT
+ *      OF NURALOGIX CORP, BE USED, COPIED, DISCLOSED,
+ *      DECOMPILED, DISASSEMBLED, MODIFIED OR OTHERWISE TRANSFERRED
+ *      EXCEPT IN ACCORDANCE WITH THE TERMS AND CONDITIONS OF A
+ *      NURALOGIX CORP SOFTWARE LICENSE AGREEMENT.
+ */
+syntax = "proto3";
+
+option cc_enable_arenas = true;
+option java_package = "ai.nuralogix.dfx";
+option java_outer_classname = "Users";
+
+package dfx.proto.users;
+
+service Services {
+  rpc Create            (CreateRequest)            returns (CreateResponse)            {}
+  rpc Login             (LoginRequest)             returns (LoginResponse)             {}
+  rpc Logout            (LogoutRequest)            returns (LogoutResponse)            {}
+  rpc Retrieve          (RetrieveRequest)          returns (RetrieveResponse)          {}
+  rpc Update            (UpdateRequest)            returns (UpdateResponse)            {}
+  rpc Remove            (RemoveRequest)            returns (RemoveResponse)            {}
+  rpc UpdateAvatar      (UpdateAvatarRequest)      returns (UpdateAvatarResponse)      {}
+  rpc SendReset         (SendResetRequest)         returns (SendResetResponse)         {}
+  rpc SendResetMobile   (SendResetMobileRequest)   returns (SendResetMobileResponse)   {}
+  rpc ResetPassword     (ResetPasswordRequest)     returns (ResetPasswordResponse)     {}
+  rpc ServiceLogin      (ServiceLoginRequest)      returns (ServiceLoginResponse)      {}
+  rpc Verify            (VerifyRequest)            returns (VerifyResponse)            {}
+  rpc VerificationCode  (VerificationCodeRequest)  returns (VerificationCodeResponse)  {}
+  rpc RequestLoginCode  (RequestLoginCodeRequest)  returns (RequestLoginCodeResponse)  {}
+  rpc LoginWithCode     (LoginWithCodeRequest)     returns (LoginWithCodeResponse)     {}
+}
+
+// Service Login
+message ServiceLoginRequest {
+  string Token = 1;
+  string RefreshToken = 2;
+  string Profile = 3;
+  string ServiceID = 4;
+}
+message ServiceLoginResponse {
+  string ID = 1;
+  string Token = 2;
+}
+
+// Create
+message CreateRequest {
+  string FirstName = 1;
+  string LastName = 2;
+  string Password = 3;
+  string Email = 4;
+  string Gender = 5;
+  string DateOfBirth = 6;
+  string RoleID = 7;
+  string PhoneNumber = 8;
+  uint32 HeightCm = 9;
+  uint32 WeightKg = 10;
+}
+message CreateResponse {
+  string ID = 1;
+}
+
+// Login
+message LoginRequest {
+  string Email = 1;
+  string Password = 2;
+}
+message LoginResponse {
+  string Token = 1;
+  string RefreshToken = 2;
+}
+
+// Logout
+message LogoutRequest {}
+message LogoutResponse {}
+
+// Update
+message UpdateRequest {
+  string FirstName = 1;
+  string LastName = 2;
+  string Password = 3;
+  string Email = 4;
+  string Gender = 5;
+  string DateOfBirth = 6;
+  string PhoneNumber = 7;
+  uint32 HeightCm = 8;
+  uint32 WeightKg = 9;
+}
+message UpdateResponse {}
+
+// Retrieve
+message RetrieveRequest {}
+message RetrieveResponse {
+  string ID = 1;
+  string FirstName = 2;
+  string LastName = 3;
+  string Email = 4;
+  string Gender = 5;
+  string DateOfBirth = 6;
+  string AvatarURI = 7;
+  uint32 Created = 8;
+  uint32 Updated = 9;
+  string RoleID = 10;
+  string PhoneNumber = 11;
+  bool IsVerified = 12;
+  string VerificationCode = 13;
+  uint32 HeightCm = 14;
+  uint32 WeightKg = 15;
+  string LoginMethod = 16;
+  string SSOID = 17;
+  string Region = 18;
+}
+
+// Remove
+message RemoveRequest {
+  string Email = 1;
+  string Password = 2;
+  string LoginCode = 3;
+  string PhoneNumber = 4;
+  string OrgKey = 5;
+  string Code = 6;
+  string Provider = 7;
+}
+message RemoveResponse {
+  bool success = 1;
+}
+
+// Remove
+message UpdateAvatarRequest {
+  string Buffer = 1;
+}
+message UpdateAvatarResponse {}
+
+// Send Reset
+message SendResetRequest {
+  string Email = 1;
+  string Identifier = 2;
+}
+message SendResetResponse {}
+
+// Send Reset Mobile
+message SendResetMobileRequest {
+  string Email = 1;
+}
+message SendResetMobileResponse {}
+
+// Reset Password
+message ResetPasswordRequest {
+  string ResetToken = 1;
+  string Password = 2;
+}
+message ResetPasswordResponse {}
+
+// Verify User
+message VerifyRequest {
+  string VerificationCode = 1;
+  string ID = 2;
+}
+message VerifyResponse {
+  bool success = 1;
+}
+
+// Verification Code
+message VerificationCodeRequest   {
+  message ParamValues {
+    string ID = 1;
+    string OrgKey = 2;
+  }
+  ParamValues Params = 1;
+}
+message VerificationCodeResponse  {
+  bool success = 1;
+  string Message = 2;
+}
+
+// Request login code via SMS
+message RequestLoginCodeRequest {
+  message ParamValues {
+    string OrgKey = 1;
+    string PhoneNumber = 2;
+  }
+  ParamValues Params = 1;
+}
+message RequestLoginCodeResponse {
+  bool success = 1;
+}
+
+// Request login code via SMS
+message LoginWithCodeRequest {
+  string LoginCode = 1;
+  string PhoneNumber = 2;
+  string OrgKey = 3;
+}
+message LoginWithCodeResponse {
+  string Token = 1;
+}

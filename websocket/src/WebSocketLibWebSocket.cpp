@@ -10,6 +10,10 @@
 #include <sstream>
 #include <thread> // std::this_thread::sleep_for
 
+#ifdef __APPLE__
+#include <TargetConditionals.h>
+#endif
+
 namespace fs = std::filesystem;
 
 // https://github.com/iamscottmoyers/simple-libwebsockets-example/blob/master/client.c
@@ -49,6 +53,8 @@ int WebSocketLibWebSocket::dfx_wss_callback(
                 break;
             case LWS_CALLBACK_PROTOCOL_INIT:
                 break;
+            case LWS_CALLBACK_VHOST_CERT_AGING:
+                break;
             default:
                 WebSocket::log(WebSocket::LOG_LEVEL_TRACE, "User data was null: UNKNOWN Event Type: %d\n", (int)reason);
                 break;
@@ -66,6 +72,13 @@ static struct lws_protocols protocols[] = {
         0,
         DFX_MAX_PAYLOAD_SIZE,
     },
+    {
+        "json",
+        ::dfx_wss_callback,
+        0,
+        DFX_MAX_PAYLOAD_SIZE,
+    },
+
     {nullptr, nullptr, 0, 0} /* terminator */
 };
 
@@ -119,9 +132,9 @@ void WebSocketLibWebSocket::setRootCertificate(const std::string& rootCA)
 {
     // libwebsocket expects a file, not the content so write the content to temporary file
 
-    // tmpnam is considered unsafe and not thread safe, the alternative below uses c++17
-    // certFilePath = std::tmpnam(nullptr);
-
+// iOS does not support the std::filesystem API, might require something else
+// but there is a decent chance that configuring the rootCA on iOS is unnecessary.
+#if !defined(TARGET_OS_IPHONE) || !TARGET_OS_IPHONE
     auto path = fs::temp_directory_path();
     certFilePath = path.append("cacert.pem").string();
 
@@ -130,6 +143,7 @@ void WebSocketLibWebSocket::setRootCertificate(const std::string& rootCA)
     auto length = static_cast<std::streamsize>(rootCA.length());
     file.write(rootCA.c_str(), length);
     file.close();
+#endif
 }
 
 void WebSocketLibWebSocket::open(const std::string& inputURL, const std::string& protocol)
@@ -201,8 +215,13 @@ void WebSocketLibWebSocket::open(const std::string& inputURL, const std::string&
         clientConnectInfo.ietf_version_or_minus_one = -1;     // IETF version is -1 (the latest one)
         clientConnectInfo.userdata = this;
 
-        clientConnectInfo.protocol = "proto"; // We use our protocol name "wss"
-        clientConnectInfo.pwsi = &wsi;        // The created client should be placed here
+        if (protocol == "json") {
+            clientConnectInfo.protocol = protocols[1].name;
+        } else {
+            clientConnectInfo.protocol = protocols[0].name;
+        }
+
+        clientConnectInfo.pwsi = &wsi; // The created client should be placed here
 
         // Connect with the client info
         lws_client_connect_via_info(&clientConnectInfo);
@@ -488,6 +507,9 @@ void WebSocketLibWebSocket::dfx_wss_log_callback(
                 break;
             case LWS_CALLBACK_CONNECTING:
                 WebSocket::log(LOG_LEVEL_TRACE, "LWS_CALLBACK_CONNECTING: %d\n", LWS_CALLBACK_CONNECTING);
+                break;
+            case LWS_CALLBACK_VHOST_CERT_AGING:
+                WebSocket::log( LOG_LEVEL_TRACE, "LWS_CALLBACK_VHOST_CERT_AGING: %d\n", LWS_CALLBACK_VHOST_CERT_AGING);
                 break;
             default:
                 WebSocket::log(LOG_LEVEL_TRACE, "callback UNKNOWN: %d\n", reason);

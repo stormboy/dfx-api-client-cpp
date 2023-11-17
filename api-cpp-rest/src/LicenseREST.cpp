@@ -6,12 +6,10 @@
 #include "dfx/api/validator/CloudValidator.hpp"
 
 #include "nlohmann/json.hpp"
-#include <fmt/format.h>
 #include <string>
 
 using namespace dfx::api;
 using namespace dfx::api::rest;
-using nlohmann::json;
 
 CloudStatus LicenseREST::list(const CloudConfig& config,
                               const std::unordered_map<LicenseFilter, std::string>& filters,
@@ -27,10 +25,13 @@ CloudStatus LicenseREST::list(const CloudConfig& config,
         return CloudStatus(CLOUD_PARAMETER_VALIDATION_ERROR, "Unexpected list filter key");
     }
 
-    json response, request;
-    auto status =
+    nlohmann::json request;
+    nlohmann::json response;
+
+    // https://dfxapiversion10.docs.apiary.io/#reference/0/licenses/get-organization-licenses
+    auto result =
         CloudREST::performRESTCall(config, web::Licenses::ListOrgLicenses, config.authToken, {}, request, response);
-    if (status.OK()) {
+    if (result.OK()) {
         std::vector<License> licensesTemp = response;
         licenses.insert(licenses.end(), licensesTemp.begin(), licensesTemp.end());
 
@@ -43,5 +44,5 @@ CloudStatus LicenseREST::list(const CloudConfig& config,
         }
     }
 
-    return status;
+    return result;
 }

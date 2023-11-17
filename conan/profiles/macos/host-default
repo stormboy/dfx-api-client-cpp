@@ -1,0 +1,8 @@
+include(../host-default)
+
+[settings]
+os=Macos
+
+[conf]
+# https://docs.conan.io/2/reference/tools/build.html#conan-tools-build-can-run
+tools.build.cross_building:can_run=True    # Allow M1 armv8 to test x86_64

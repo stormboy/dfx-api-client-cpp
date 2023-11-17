@@ -1,6 +1,6 @@
-if(NOT WITH_WEBSOCKET)
-  return() # WebSockets is only supported if built WITH_WEBSOCKET
-endif(NOT WITH_WEBSOCKET)
+if(NOT (WITH_WEBSOCKET_JSON OR WITH_WEBSOCKET_PROTOBUF))
+  return() # WebSockets is only supported if built WITH_WEBSOCKET_JSON or WITH_WEBSOCKET_PROTOBUF
+endif(NOT (WITH_WEBSOCKET_JSON OR WITH_WEBSOCKET_PROTOBUF))
 
 add_definitions(-DWITH_WEBSOCKET)
 

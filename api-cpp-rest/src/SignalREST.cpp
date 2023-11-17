@@ -12,7 +12,6 @@
 
 using namespace dfx::api;
 using namespace dfx::api::rest;
-using nlohmann::json;
 
 CloudStatus SignalREST::list(const CloudConfig& config,
                              const std::unordered_map<SignalFilter, std::string>& filters,
@@ -27,7 +26,9 @@ CloudStatus SignalREST::list(const CloudConfig& config,
 CloudStatus SignalREST::retrieve(const CloudConfig& config, const std::string& signalID, Signal& signal)
 {
     DFX_CLOUD_VALIDATOR_MACRO(SignalValidator, retrieve(config, signalID, signal));
-    json response, request;
+
+    nlohmann::json request;
+    nlohmann::json response;
     auto status =
         CloudREST::performRESTCall(config, web::Signals::Retrieve, config.authToken, {signalID}, request, response);
     if (status.OK()) {
@@ -50,7 +51,9 @@ CloudStatus SignalREST::retrieveStudySignalIDs(const CloudConfig& config,
                                                std::vector<std::string>& signalIDs)
 {
     DFX_CLOUD_VALIDATOR_MACRO(SignalValidator, retrieveStudySignalIDs(config, studyID, signalIDs));
-    json response, request;
+
+    nlohmann::json request;
+    nlohmann::json response;
     auto status =
         CloudREST::performRESTCall(config, web::Studies::Retrieve, config.authToken, {studyID}, request, response);
     if (status.OK()) {

@@ -53,6 +53,9 @@ using User = struct User
     std::string ssoID;
     std::string region;
     std::string dateOfBirth;
+
+    std::string passwordSetDate;
+    bool mfaEnabled;
 };
 
 using UserRole = struct UserRole

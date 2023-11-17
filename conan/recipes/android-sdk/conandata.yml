@@ -1,0 +1,15 @@
+sources:
+  "latest":
+    "Windows":
+      "x86_64":
+        url: "https://dl.google.com/android/repository/sdk-tools-windows-4333796.zip"
+        sha256: "7e81d69c303e47a4f0e748a6352d85cd0c8fd90a5a95ae4e076b5e5f960d3c7a"
+    "Linux":
+      "x86_64":
+        url: "https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip"
+        sha256: "92ffee5a1d98d856634e8b71132e8a95d96c83a63fde1099be3d86df3106def9"
+    "Macos":
+      "x86_64":
+        url: "https://dl.google.com/android/repository/sdk-tools-darwin-4333796.zip"
+        sha256: "ecb29358bc0f13d7c2fa0f9290135a5b608e38434aad9bf7067d0252c160853e"
+

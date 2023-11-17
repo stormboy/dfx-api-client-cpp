@@ -1,0 +1,252 @@
+/*
+ *              Copyright (c) 2016-2019, Nuralogix Corp.
+ *                      All Rights reserved
+ *
+ *      THIS SOFTWARE IS LICENSED BY AND IS THE CONFIDENTIAL AND
+ *      PROPRIETARY PROPERTY OF NURALOGIX CORP. IT IS
+ *      PROTECTED UNDER THE COPYRIGHT LAWS OF THE USA, CANADA
+ *      AND OTHER FOREIGN COUNTRIES. THIS SOFTWARE OR ANY
+ *      PART THEREOF, SHALL NOT, WITHOUT THE PRIOR WRITTEN CONSENT
+ *      OF NURALOGIX CORP, BE USED, COPIED, DISCLOSED,
+ *      DECOMPILED, DISASSEMBLED, MODIFIED OR OTHERWISE TRANSFERRED
+ *      EXCEPT IN ACCORDANCE WITH THE TERMS AND CONDITIONS OF A
+ *      NURALOGIX CORP SOFTWARE LICENSE AGREEMENT.
+ */
+syntax = "proto3";
+
+import "google/protobuf/struct.proto";
+option cc_enable_arenas = true;
+option java_package = "ai.nuralogix.dfx";
+option java_outer_classname = "Measurements";
+
+package dfx.proto.measurements;
+
+service Services {
+  rpc Create           (CreateRequest)     returns (CreateResponse)    {}
+  rpc List             (ListRequest)       returns (ListResponse)      {}
+  rpc Retrieve         (RetrieveRequest)   returns (RetrieveResponse)  {}
+  rpc Data             (DataRequest)       returns (DataResponse)      {}
+  rpc Reset            (ResetRequest)      returns (ResetResponse)     {}
+  rpc Remove           (RemoveRequest)     returns (RemoveResponse)    {}
+  rpc Results          (ResultsRequest)    returns (ResultsResponse)   {}
+  rpc Files            (FilesRequest)      returns (FilesResponse)     {}
+  rpc AddFile          (AddFileRequest)    returns (AddFileResponse)   {}
+  rpc RemoveFile       (RemoveFileRequest) returns (RemoveFileRequest) {}
+  rpc SubscribeResults (SubscribeResultsRequest) returns (SubscribeResultsResponse) {}
+}
+
+// Create
+message CreateRequest {
+  string StudyID = 1;
+  uint32 Resolution = 2;
+  string UserProfileID = 3;
+  string DeviceVersion = 4;
+  string Notes = 5;
+  string Mode = 6;
+  string PartnerID = 7;
+}
+message CreateResponse {
+  string ID = 1;
+}
+
+// List
+message ListRequest {
+  message QueryValues {
+    string StatusID = 1;
+    string Date = 2;
+    string EndDate = 3;
+    uint32 Limit = 4;
+    uint32 Offset = 5;
+    string UserProfileName = 6;
+    string Mode = 7;
+  }
+  QueryValues Query = 1;
+}
+message ListResponse {
+  message Measurement {
+    string ID = 1;
+    string UserID = 2;
+    string UserProfileID = 3;
+    string DeviceID = 4;
+    string StudyID = 5;
+    string StatusID = 6;
+    string DeviceVersion = 7;
+    uint32 Created = 8;
+    uint32 Updated = 9;
+    uint32 TotalCount = 10;
+    string UserProfileName = 11;
+    string Mode = 12;
+  }
+  repeated Measurement Values = 1;
+}
+
+// Retrieve
+message RetrieveRequest {
+  message ParamValues {
+    string ID = 1;
+    bool ExpandResults = 2;
+  }
+  ParamValues Params = 1;
+}
+message RetrieveResponse {
+  string StudyID = 1;
+  string StatusID = 2;
+  string DeviceVersion = 3;
+  google.protobuf.Struct Files = 4;
+  google.protobuf.Struct Results = 5;
+  uint32 Created = 6;
+  uint32 Updated = 7;
+  string ID = 8;
+  string UserName = 9;
+  string UserProfileName = 10;
+  string Mode = 11;
+  string Region = 12;
+}
+// Data
+message DataRequest {
+  reserved 8, 3 to 6;
+  reserved "ChunkOrder", "StartTime", "EndTime", "Duration", "Meta";
+  message ParamValues {
+    string ID = 1;
+  }
+  ParamValues Params = 1;
+  string Action = 2;
+  bytes Payload = 7; // Binary payload created by libdfx / dfx SDK
+}
+
+message DataResponse {
+  string ID = 1;
+  uint32 ChunkOrder = 2;
+}
+
+message ResultsStreamResponse {
+  message Face {
+    message Result {
+      repeated float Data = 1 [packed=true];
+    }
+    map<string, Result> Results = 1;
+  }
+  map<string, Face> Results = 1;
+}
+
+// Remove
+message RemoveRequest {
+  message ParamValues {
+    string ID = 1;
+  }
+  ParamValues Params = 1;
+}
+message RemoveResponse {}
+
+// Reset
+message ResetRequest {
+  message ParamValues {
+    string ID = 1;
+  }
+  ParamValues Params = 1;
+}
+message ResetResponse {}
+
+// Files
+message FilesRequest {
+  message ParamValues {
+    string ID = 1;
+  }
+  ParamValues Params = 1;
+}
+message FilesResponse {
+  message File {
+    string ID = 1;
+    string MeasurementDataID = 2;
+    string MimeTypeID = 3;
+    string URI = 4;
+    string Checksum = 5;
+    string StorageVolume = 6;
+    uint32 Size = 7;
+    bool Computed = 8;
+    uint32 Created = 9;
+  }
+  repeated File Values = 1;
+}
+
+// Add File
+message AddFileRequest {
+  message ParamValues {
+    string ID = 1;
+    string MeasurementDataID = 2;
+  }
+  string FileID = 1;
+  string MeasurementDataID = 2;
+  string MimeTypeID = 3;
+  string URI = 4;
+  string Checksum = 5;
+  int32 Size = 6;
+  bool Computed = 7;
+  string Storage = 8;
+  ParamValues Params = 9;
+}
+message AddFileResponse {
+  string ID = 1;
+  string FileID = 2;
+}
+
+// Remove File
+message RemoveFileRequest {
+  message ParamValues {
+    string ID = 1;
+    string MeasurementFileID = 2;
+  }
+  ParamValues Params = 1;
+}
+message RemoveFileResponse {}
+
+// Results
+message ResultsRequest {
+  message ParamValues {
+    string ID = 1;
+  }
+  ParamValues Params = 1;
+}
+message ResultsResponse {
+  google.protobuf.Struct Results = 1;
+}
+
+// Subscribe Results
+message SubscribeResultsRequest {
+  message ParamValues {
+    string ID = 1;
+  }
+  ParamValues Params = 1;
+  string RequestID = 2;
+}
+
+message Error {
+  message Description {
+    repeated string msgs = 1;
+  }
+  string Code = 1;
+  map<string, Description> Errors = 2;
+}
+
+// SubscribeResultsResponse
+message SubscribeResultsResponse {
+  message Channel {
+        repeated sint32 Data = 1 [packed=true];
+        string Channel = 2;
+        repeated string Notes = 3;
+  }
+  string MeasurementID = 1 ;
+  string MeasurementDataID = 2 ;
+  string MeasurementResultID = 3 ;
+  uint32 Multiplier = 4;
+  map<string, Channel> Channels = 5;
+  Error Error = 6;
+}
+
+// Subscribe to Reprocess
+message SubscribeReprocessRequest {
+  string MeasurementID = 1;
+  string StudyID=2;
+}
+
+message SubscribeReprocessResponse {}

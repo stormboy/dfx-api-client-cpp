@@ -50,7 +50,7 @@ TEST_F(ProfileTests, listProfile)
         filters.emplace(ProfileAPI::ProfileFilter::ProfileName, profile.name);
 
         // WebSocket does not support a status filter
-        if (client->getTransportType().compare(CloudAPI::TRANSPORT_TYPE_WEBSOCKET) != 0) {
+        if (client->getTransportType().compare(CloudAPI::TRANSPORT_TYPE_WEBSOCKET_PROTOBUF) != 0) {
             filters.emplace(ProfileAPI::ProfileFilter::ProfileStatus, statusString);
         }
 
@@ -150,5 +150,8 @@ TEST_F(ProfileTests, ProfileNotFound)
 
     Profile profile;
     auto status = service->retrieve(config, profileID, profile);
+    if (status.code == CLOUD_USER_NOT_AUTHORIZED) {
+        GTEST_SKIP() << "ProfileTests::ProfileNotFound(): USER_NOT_AUTHORIZED";
+    }
     ASSERT_EQ(status.code, CLOUD_RECORD_NOT_FOUND) << status;
 }

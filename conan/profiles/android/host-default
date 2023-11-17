@@ -1,0 +1,19 @@
+include(../host-default)
+
+[settings]
+os=Android
+build_type=Release
+compiler=clang
+compiler.libcxx=c++_static
+compiler.version=14
+os=Android
+
+# Updated from 21 on Feb 17, 2023. I believe dfxembeddedopencv requires 26 and we use 30.
+os.api_level=26
+
+[tool_requires]
+android-ndk/r25c
+android-sdk/latest
+
+# dfxembeddedopencv requires <3.20 on android with_java
+dfxembeddedopencv*: cmake/3.19.8

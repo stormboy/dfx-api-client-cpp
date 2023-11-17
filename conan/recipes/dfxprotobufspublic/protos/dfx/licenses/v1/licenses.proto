@@ -1,0 +1,134 @@
+/*
+ *              Copyright (c) 2016-2019, Nuralogix Corp.
+ *                      All Rights reserved
+ *
+ *      THIS SOFTWARE IS LICENSED BY AND IS THE CONFIDENTIAL AND
+ *      PROPRIETARY PROPERTY OF NURALOGIX CORP. IT IS
+ *      PROTECTED UNDER THE COPYRIGHT LAWS OF THE USA, CANADA
+ *      AND OTHER FOREIGN COUNTRIES. THIS SOFTWARE OR ANY
+ *      PART THEREOF, SHALL NOT, WITHOUT THE PRIOR WRITTEN CONSENT
+ *      OF NURALOGIX CORP, BE USED, COPIED, DISCLOSED,
+ *      DECOMPILED, DISASSEMBLED, MODIFIED OR OTHERWISE TRANSFERRED
+ *      EXCEPT IN ACCORDANCE WITH THE TERMS AND CONDITIONS OF A
+ *      NURALOGIX CORP SOFTWARE LICENSE AGREEMENT.
+ */
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+option cc_enable_arenas = true;
+option java_package = "ai.nuralogix.dfx.licenses.v1";
+option java_outer_classname = "Licenses";
+option go_package = "bitbucket.org/nuralogix/dfx-protobuffs-go/dfx/licenses/v1;licenses";
+option csharp_namespace = "Nuralogix.Dfx.Licenses.V1";
+
+package dfx.licenses.v1;
+
+service API {
+  rpc Create (CreateRequest) returns (CreateResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/licenses"
+      body: "*"
+    };
+  }
+  rpc Remove (RemoveRequest) returns (RemoveResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/licenses/{id}"
+    };
+  }
+  rpc Update (UpdateRequest) returns (UpdateResponse) {
+    option (google.api.http) = {
+      patch: "/api/v1/licenses/{id}"
+      body: "*"
+    };
+  }
+  rpc List (ListRequest) returns (ListResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/licenses"
+    };
+  }   
+  rpc Retrieve (RetrieveRequest) returns (RetrieveResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/licenses/{id}"
+    };
+  }
+  rpc RetrieveMultiple (RetrieveMultipleRequest) returns (RetrieveMultipleResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/licenses/retrieve-multiple"
+      body: "*"
+    };
+  }
+}
+
+enum Status {
+  UNKNOWN_LICENSE_STATUS = 0;
+  ACTIVE = 1;
+  INACTIVE = 2;
+  DELETED = 3;
+  EXPIRED = 4;
+}
+
+// Create
+message CreateRequest {
+  License license = 1;
+}
+message CreateResponse {
+  string id = 1;
+}
+
+// Remove
+message RemoveRequest {
+  string id = 1;
+}
+message RemoveResponse {}
+
+// Update
+message UpdateRequest {
+  string id = 1;
+  License license = 2;
+}
+message UpdateResponse {}
+
+// List
+message ListRequest {
+  uint32 limit = 1;
+  uint32 offset = 2;
+}
+message ListResponse{
+  message License {
+    string id = 1;
+    string organization_id = 2;
+    Status status = 3;
+    string role = 4;
+  }
+  uint32 total = 1;
+  repeated License licenses = 2;
+}
+
+// Retrieve
+message RetrieveRequest {
+  string id = 1;
+}
+message RetrieveResponse {
+  License license = 1;
+}
+
+// RetrieveMultiple
+message RetrieveMultipleRequest {
+  repeated string ids = 1;
+}
+message RetrieveMultipleResponse {
+  // map[license_id] -> License object
+  map<string, License> licenses = 1;
+}
+
+// License object being used in multiple endpoints
+message License {
+  string role = 1;
+  uint32 max_devices = 2;
+  string organization_id = 3;
+  Status status = 4;
+  google.protobuf.Timestamp expiration = 5;
+}
+ 

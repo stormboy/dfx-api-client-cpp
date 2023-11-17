@@ -1,0 +1,164 @@
+# Toolchains dependencies
+emsdk:
+  name: "emsdk"
+  version: "3.1.31"
+  recipe: "conan/recipes/emsdk/all"
+
+android_ndk:
+  name: "android-ndk"
+  version: "r25c"
+  recipe: "conan/recipes/android-ndk/all"
+
+android_sdk:
+  name: "android-sdk"
+  version: "latest"
+  recipe: "conan/recipes/android-sdk"
+
+zulu_openjdk:
+  name: "zulu-openjdk"
+  version: "8.70.0.23"
+  recipe: "conan/recipes/zulu-openjdk/all"
+
+cmake:
+  name: "cmake"
+  version: "3.26.3"
+  recipe: "conan/recipes/cmake/binary"
+
+# Requirements
+abseil:
+  name: "abseil"
+  version: "20230125.3"
+  recipe: "conan/recipes/abseil/all"
+  source-vcs: "https://github.com/conan-io/conan-center-index.git"
+  source-path: "recipes/abseil/all"
+  source-rev: "ee2aaf8" 
+
+base64:
+  name: "base64"
+  version: "0.5.0"
+  recipe: "conan/recipes/base64/all"
+  source-vcs: "https://github.com/conan-io/conan-center-index.git"
+  source-path: "recipes/base64/all"
+  source-rev: "ee2aaf8" 
+
+c-ares:
+  name: "c-ares"
+  version: "1.19.1"
+  recipe: "conan/recipes/c-ares/all"
+  source-vcs: "https://github.com/conan-io/conan-center-index.git"
+  source-path: "recipes/c-ares/all"
+  source-rev: "ee2aaf8" 
+
+cli11:
+  name: "cli11"
+  version: "2.3.2"
+  recipe: "conan/recipes/cli11/all"
+  source-vcs: "https://github.com/conan-io/conan-center-index.git"
+  source-path: "recipes/cli11/all"
+  source-rev: "ee2aaf8" 
+
+dfxprotobufspublic:
+  name: "dfxprotobufspublic"
+  version: "20210805_0094d09"
+  recipe: "conan/recipes/dfxprotobufspublic"
+  source-vcs: "https://github.com/nuralogix/dfx-api-client-cpp"
+  source-path: "conan/recipes/dfxprotobufspublic"
+
+dfxprotosweb:
+  name: "dfxprotosweb"
+  version: "20230629_2417e6e"
+  recipe: "conan/recipes/dfxprotosweb"
+  source-vcs: "https://github.com/nuralogix/dfx-api-client-cpp"
+  source-path: "conan/recipes/dfxprotosweb"
+  
+doxygen:
+  name: "doxygen"
+  version: "1.9.4"
+  source: "conan-center-index"
+  recipe: "conan/recipes/doxygen/all"
+
+fmt:
+  name: "fmt"
+  version: "9.1.0"
+  source: "conan-center-index"
+  recipe: "conan/recipes/fmt/all"
+
+gflags:
+  name: "gflags"
+  version: "2.2.2"
+  recipe: "conan/recipes/gflags/all"
+
+googleapis:
+  name: "googleapis"
+  version: "20230427_4041378"
+  source: "custom"
+  recipe: "conan/recipes/googleapis"
+
+grpc:
+  name: "grpc"
+  version: "1.50.1"
+  source: "conan-center-index"
+  recipe: "conan/recipes/grpc/all"
+
+gtest:
+  name: "gtest"
+  version: "1.13.0"
+  recipe: "conan/recipes/gtest/all"
+
+libcurl:
+  name: "libcurl"
+  version: "8.2.1"
+  source: "conan-center-index"
+  recipe: "conan/recipes/libcurl/all"
+
+libwebsockets:
+  name: "libwebsockets"
+  version: "4.3.2"
+  source: "conan-center-index"
+  recipe: "conan/recipes/libwebsockets/all"
+
+meson:
+  name: "meson"
+  version: "1.1.1"
+  source: "conan-center-index"
+  recipe: "conan/recipes/meson/all"
+
+naturalsort:
+  name: "naturalsort"
+  version: "20210209_5c71f46"
+  recipe: "conan/recipes/naturalsort"
+
+nlohmann_json:
+  name: "nlohmann_json"
+  version: "3.11.2"
+  source: "conan-center-index"
+  recipe: "conan/recipes/nlohmann_json/all"
+
+# openssl/3.1.0 and openssl/3.1.1 both crash when running Macos M1 (Armv8) in Debug
+# but they appear to work fine in Release.
+openssl:
+  name: "openssl"
+  version: "3.0.9"
+  source: "conan-center-index"
+  recipe: "conan/recipes/openssl/3.x.x"
+
+protobuf:
+  name: "protobuf"
+  version: "3.21.9"
+  recipe: "conan/recipes/protobuf/all"
+  source: "conan-center-index"
+
+protomatlabdoxygen:
+  name: "protomatlabdoxygen"
+  version: "20200618_2073e51"
+  recipe: "conan/recipes/protomatlabdoxygen"
+
+re2:
+  name: "re2"
+  version: "20230602"
+  recipe: "conan/recipes/re2/all"
+
+yaml-cpp:
+  name: "yaml-cpp"
+  version: "0.7.0"
+  recipe: "conan/recipes/yaml-cpp/all"

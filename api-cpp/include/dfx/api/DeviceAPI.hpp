@@ -49,14 +49,18 @@ public:
     enum class DeviceFilter
     {
         FullObject,
-        ID,           // WebSocket
-        StatusID,     // REST,WebSocket
-        Unique,       // REST,WebSocket
-        DeviceTypeID, // REST,WebSocket
-        Name,         // REST,WebSocket
-        Version,      // REST,WebSocket
-        Date,         // REST,WebSocket
-        EndDate       // REST,WebSocket
+
+        Date,         // REST,WebSocket: list
+        EndDate,      // REST,WebSocket: list
+        Name,         // REST,WebSocket: list
+        Version,      // REST,WebSocket: list
+        StatusID,     // REST,WebSocket: list
+        DeviceTypeID, // REST,WebSocket: list
+        LicenseID,    // REST,WebSocket: list
+        SortOrder,    // REST,WebSocket: list
+
+        ID // WebSocket proto: list
+        // Unique,       // REST,WebSocket
     };
 
     /**

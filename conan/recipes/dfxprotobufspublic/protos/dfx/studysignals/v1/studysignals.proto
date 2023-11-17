@@ -1,0 +1,68 @@
+/*
+ *              Copyright (c) 2016-2019, Nuralogix Corp.
+ *                      All Rights reserved
+ *
+ *      THIS SOFTWARE IS LICENSED BY AND IS THE CONFIDENTIAL AND
+ *      PROPRIETARY PROPERTY OF NURALOGIX CORP. IT IS
+ *      PROTECTED UNDER THE COPYRIGHT LAWS OF THE USA, CANADA
+ *      AND OTHER FOREIGN COUNTRIES. THIS SOFTWARE OR ANY
+ *      PART THEREOF, SHALL NOT, WITHOUT THE PRIOR WRITTEN CONSENT
+ *      OF NURALOGIX CORP, BE USED, COPIED, DISCLOSED,
+ *      DECOMPILED, DISASSEMBLED, MODIFIED OR OTHERWISE TRANSFERRED
+ *      EXCEPT IN ACCORDANCE WITH THE TERMS AND CONDITIONS OF A
+ *      NURALOGIX CORP SOFTWARE LICENSE AGREEMENT.
+ */
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+
+option cc_enable_arenas = true;
+option java_package = "ai.nuralogix.dfx.studysignals.v1";
+option java_outer_classname = "StudySignals";
+option go_package = "bitbucket.org/nuralogix/dfx-protobuffs-go/dfx/studysignals/v1;studysignals";
+option csharp_namespace = "Nuralogix.Dfx.Studysignals.V1";
+
+package dfx.studysignals.v1;
+
+service API {
+  rpc Retrieve (RetrieveRequest) returns (RetrieveResponse) {
+      option (google.api.http) = {
+        get: "/api/v1/studysignals/{study_template_id}"
+      };
+      option deprecated = true;
+  }
+  rpc RetrieveMultiple (RetrieveMultipleRequest) returns (RetrieveMultipleResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/studysignals/retrieve-multiple"
+      body: "*"
+    };
+    option deprecated = true;
+  }
+}
+
+// Retrieve
+message RetrieveRequest {
+  option deprecated = true;
+  string study_template_id = 1;
+}
+message RetrieveResponse {
+  option deprecated = true;
+  StudySignal study_signal = 1;
+}
+
+// RetrieveMultiple
+message RetrieveMultipleRequest {
+  option deprecated = true;
+  repeated string study_template_ids = 1;
+}
+message RetrieveMultipleResponse {
+  option deprecated = true;
+  repeated StudySignal study_signals = 1;
+}
+
+// StudySignal object being used in Retrieve and RetrieveMultiple EPs
+message StudySignal {
+  option deprecated = true;
+  repeated string signal_ids = 1;
+}
+

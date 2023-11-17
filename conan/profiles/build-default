@@ -1,0 +1,4 @@
+include(default)
+
+# Above will source the USER ~/.conan2/profiles/default which should ideally be
+# a very basic definition of the platform as created by a new install of conan

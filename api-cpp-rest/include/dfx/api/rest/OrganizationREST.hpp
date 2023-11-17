@@ -41,6 +41,22 @@ public:
 
     CloudStatus remove(const CloudConfig& config, const std::string& organizationID) override;
 
+    CloudStatus listUsers(const CloudConfig& config,
+                                  const std::unordered_map<dfx::api::UserAPI::UserFilter, std::string>& filters,
+                                  uint16_t offset,
+                                  std::vector<User>& users,
+                                  int16_t& totalCount) override;
+
+    CloudStatus createUser(const CloudConfig& config, User& user) override;
+
+    CloudStatus
+    retrieveUser(const CloudConfig& config, const std::string& userID, const std::string& email, User& user) override;
+
+    CloudStatus
+    updateUser(const CloudConfig& config, const std::string& userID, const std::string& email, const User& user) override;
+
+    CloudStatus removeUser(const CloudConfig& config, const std::string& userID, const std::string& email) override;
+
 private:
     CloudStatus getLogo(const CloudConfig& config, const std::string& ID, std::string& logo);
 };

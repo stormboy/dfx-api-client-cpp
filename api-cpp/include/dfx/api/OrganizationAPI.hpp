@@ -5,10 +5,12 @@
 #ifndef DFX_API_CLOUD_ORGANIZATION_API_H
 #define DFX_API_CLOUD_ORGANIZATION_API_H
 
+#include "UserAPI.hpp"
 #include "dfx/api/CloudAPI_Export.hpp"
 #include "dfx/api/CloudConfig.hpp"
 #include "dfx/api/CloudStatus.hpp"
 #include "dfx/api/types/OrganizationTypes.hpp"
+#include "dfx/api/types/UserTypes.hpp"
 
 #include <cstdint>
 #include <list>
@@ -33,7 +35,6 @@ public:
     enum class OrganizationFilter
     {
         FullObject
-
     };
 
     /**
@@ -178,6 +179,125 @@ public:
      * @return 接口返回值 CLOUD_OK:成功
      */
     virtual CloudStatus remove(const CloudConfig& config, const std::string& organizationID);
+
+    /**
+     * \~english
+     * @brief Retrieves a list of users within the organization
+     *
+     * @param config provides all the cloud configuration settings
+     * @param offset to start the retrieval of records up to config.listLimit
+     * @param users list of user being returned
+     * @param totalCount the total number of records on the server
+     * @return status of operation, CLOUD_OK on SUCCESS
+     *
+     * \~chinese
+     * @brief 获取组织列表
+     *
+     * @param config 服务配置参数
+     * @param offset 偏移量指定查询开始位置
+     * @param users 组织列表
+     * @param totalCount 总数
+     * @return 接口返回值 CLOUD_OK:成功
+     */
+    virtual CloudStatus listUsers(const CloudConfig& config,
+                             const std::unordered_map<dfx::api::UserAPI::UserFilter, std::string>& filters,
+                             uint16_t offset,
+                             std::vector<User>& users,
+                             int16_t& totalCount);
+
+    /**
+     * \~english
+     * @brief Create a users within the organization
+     *
+     * @param config provides all the cloud configuration settings
+     * @param user the user properties to create a user with, server will update properties returned on CLOUD_OK
+     * @return status of operation, CLOUD_OK on SUCCESS
+     *
+     * \~chinese
+     * @brief 获取组织列表
+     *
+     * @param config 服务配置参数
+     * @param user
+     * @return 接口返回值 CLOUD_OK:成功
+     */
+    virtual CloudStatus createUser(const CloudConfig& config, User& user);
+
+    /**
+     * \~english
+     * @brief Retrieve a user from the server based on the userID and/or email.
+     *
+     * \verbatim embed:rst:leading-asterisk
+     *     .. note::
+     *
+     *        Only one of userID or email is required and the other can be
+     *        left empty except in the case where the email is used across
+     *        multiple organizations and the userID is required.
+     *
+     * \endverbatim
+     *
+     * @param config provides all the cloud configuration settings
+     * @param userID unique ID of the user being retrieved
+     * @param email the associated email address of the account
+     * @param user the retrieved user account
+     * @return status of operation, CLOUD_OK on SUCCESS
+     *
+     * \~chinese
+     * @brief 获取用户
+     *
+     * @param config 服务配置参数
+     * @param userID 用户ID
+     * @param email the 邮箱
+     * @param user 用户信息
+     * @return 接口返回值 CLOUD_OK:成功
+     */
+    virtual CloudStatus
+    retrieveUser(const CloudConfig& config, const std::string& userID, const std::string& email, User& user);
+
+    /**
+     * \~english
+     * @brief Update a user on the server.
+     *
+     * @param config provides all the cloud configuration settings
+     * @param user account to update
+     * @return status of operation, CLOUD_OK on SUCCESS
+     *
+     * \~chinese
+     * @brief 更新用户
+     *
+     * @param config 服务配置参数
+     * @param user 用户信息
+     * @return 接口返回值 CLOUD_OK:成功
+     */
+    virtual CloudStatus
+    updateUser(const CloudConfig& config, const std::string& userID, const std::string& email, const User& user);
+
+    /**
+     * \~english
+     * @brief Remove a user from the server based on the userID and/or email.
+     *
+     * \verbatim embed:rst:leading-asterisk
+     *     .. note::
+     *
+     *        Only one of userID or email is required and the other can be
+     *        left empty except in the case where the email is used across
+     *        multiple organizations and the userID is required.
+     *
+     * \endverbatim
+     *
+     * @param config provides all the cloud configuration settings
+     * @param userID unique ID of the user being retrieved
+     * @param email the associated email address of the account
+     * @return status of operation, CLOUD_OK on SUCCESS
+     *
+     * \~chinese
+     * @brief 删除用户
+     *
+     * @param config 服务配置参数
+     * @param userID 用户ID
+     * @param email 邮箱
+     * @return 接口返回值 CLOUD_OK:成功
+     */
+    virtual CloudStatus removeUser(const CloudConfig& config, const std::string& userID, const std::string& email);
 };
 
 } // namespace dfx::api

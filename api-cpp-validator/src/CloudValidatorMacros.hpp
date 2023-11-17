@@ -19,7 +19,7 @@
 // These are localized to this file and undefined at the bottom.
 ///////////////////////////////////////////////////////////////////////////////////////
 #define MACRO_RETURN_ERROR_IF_NO_USER_TOKEN(config)                                                                    \
-    if (config.authToken.empty()) {                                                                                    \
+    if (!config.authPassword.empty() && config.authToken.empty()) {                                                    \
         return CloudStatus(CLOUD_CONFIG_USER_TOKEN_MISSING, "Require Config.m_sUserToken, have you logged in?");       \
     }
 

@@ -40,23 +40,6 @@ CloudStatus UserAPI::update(const CloudConfig& config, const User& user)
     return CloudStatus(CLOUD_UNIMPLEMENTED_FEATURE);
 }
 
-CloudStatus
-UserAPI::retrieve(const CloudConfig& config, const std::string& userID, const std::string& email, User& user)
-{
-    return CloudStatus(CLOUD_UNIMPLEMENTED_FEATURE);
-}
-
-CloudStatus
-UserAPI::update(const CloudConfig& config, const std::string& userID, const std::string& email, const User& user)
-{
-    return CloudStatus(CLOUD_UNIMPLEMENTED_FEATURE);
-}
-
-CloudStatus UserAPI::remove(const CloudConfig& config, const std::string& userID, const std::string& email)
-{
-    return CloudStatus(CLOUD_UNIMPLEMENTED_FEATURE);
-}
-
 CloudStatus UserAPI::reqLoginCode(const CloudConfig& config, const std::string& sOrgKey, const std::string& sPhoNum)
 {
     return CloudStatus(CLOUD_UNIMPLEMENTED_FEATURE);

@@ -38,7 +38,7 @@ public:
 
     const std::string& getTransportType() override;
 
-    CloudStatus getServerStatus(CloudConfig& config) override;
+    CloudStatus getServerStatus(CloudConfig& config, std::string& response) override;
 
     // *********************************************************************************
     // AUTHENTICATION SECTION
@@ -46,13 +46,21 @@ public:
 
     CloudStatus login(CloudConfig& config) override;
 
+    CloudStatus loginWithToken(CloudConfig& config, std::string& token) override;
+
     CloudStatus logout(CloudConfig& config) override;
 
-    CloudStatus registerDevice(CloudConfig& config, const std::string& appName, const std::string& appVersion) override;
+    CloudStatus registerDevice(CloudConfig& config,
+                               const std::string& appName,
+                               const std::string& appVersion,
+                               const uint16_t tokenExpiresInSeconds,
+                               const std::string& tokenSubject) override;
 
     CloudStatus unregisterDevice(CloudConfig& config) override;
 
-    CloudStatus validateToken(const CloudConfig& config, const std::string& userToken) override;
+    CloudStatus verifyToken(const CloudConfig& config, std::string& response) override;
+
+    CloudStatus renewToken(const CloudConfig& config, std::string& token, std::string& refreshToken) override;
 
     CloudStatus switchEffectiveOrganization(CloudConfig& config, const std::string& organizationID) override;
 
@@ -65,11 +73,11 @@ public:
 
     std::shared_ptr<MeasurementStreamAPI> measurementStream(const CloudConfig& config) override;
 
+    std::shared_ptr<OrganizationAPI> organization(const CloudConfig& config) override;
+
     std::shared_ptr<SignalAPI> signal(const CloudConfig& config) override;
 
     std::shared_ptr<StudyAPI> study(const CloudConfig& config) override;
-
-    std::shared_ptr<UserAPI> user(const CloudConfig& config) override;
 
 private:
     friend class DeviceGRPC;

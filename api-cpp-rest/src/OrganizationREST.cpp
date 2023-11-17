@@ -11,7 +11,6 @@
 
 using namespace dfx::api;
 using namespace dfx::api::rest;
-using nlohmann::json;
 
 CloudStatus OrganizationREST::create(const CloudConfig& config,
                                      const std::string& name,
@@ -41,15 +40,19 @@ CloudStatus OrganizationREST::retrieve(const CloudConfig& config,
 {
     DFX_CLOUD_VALIDATOR_MACRO(OrganizationValidator, retrieve(config, organizationID, organization));
 
-    json response, request;
-    auto status =
+    nlohmann::json request;
+    nlohmann::json response;
+
+    // https://dfxapiversion10.docs.apiary.io/#reference/0/organizations/retrieve
+    auto result =
         CloudREST::performRESTCall(config, web::Organizations::Retrieve, config.authToken, {}, request, response);
 
-    if (status.OK()) {
+    if (result.OK()) {
         organization = response;
         getLogo(config, organizationID, organization.logo);
     }
-    return status;
+
+    return result;
 }
 
 CloudStatus OrganizationREST::update(const CloudConfig& config, Organization& organization)
@@ -66,12 +69,100 @@ CloudStatus OrganizationREST::remove(const CloudConfig& config, const std::strin
 
 CloudStatus OrganizationREST::getLogo(const CloudConfig& config, const std::string& ID, std::string& logo)
 {
-    json response, request;
-    auto status =
+    nlohmann::json request;
+    nlohmann::json response;
+
+    // https://dfxapiversion10.docs.apiary.io/#reference/0/organizations/logo
+    auto result =
         CloudREST::performRESTCall(config, web::Organizations::RetrieveLogo, config.authToken, {ID}, request, response);
 
-    if (status.OK()) {
+    if (result.OK()) {
         logo = response;
     }
-    return status;
+
+    return result;
+}
+
+CloudStatus OrganizationREST::listUsers(const CloudConfig& config,
+                      const std::unordered_map<dfx::api::UserAPI::UserFilter, std::string>& filters,
+                      uint16_t offset,
+                      std::vector<User>& users,
+                      int16_t& totalCount) {
+    DFX_CLOUD_VALIDATOR_MACRO(OrganizationValidator, listUsers(config, filters, offset, users, totalCount));
+
+    nlohmann::json request;
+    nlohmann::json response;
+
+    auto result = CloudREST::performRESTCall(
+        config, web::Organizations::Users, config.authToken, {}, request, response);
+
+    if (result.OK()) {
+        users = response;
+    }
+
+    return result;
+}
+
+CloudStatus OrganizationREST::createUser(const CloudConfig& config, User& user) {
+    DFX_CLOUD_VALIDATOR_MACRO(OrganizationValidator, createUser(config, user));
+
+    nlohmann::json request = user;
+    nlohmann::json response;
+
+    auto result = CloudREST::performRESTCall(
+        config, web::Organizations::CreateUser, config.authToken, {}, request, response);
+
+    if (result.OK()) {
+        user = response;
+    }
+
+    return result;
+}
+
+CloudStatus
+OrganizationREST::retrieveUser(const CloudConfig& config, const std::string& userID, const std::string& email, User& user)
+{
+    // Ignore email check for empty, REST call is going to ignore it anyway
+    DFX_CLOUD_VALIDATOR_MACRO(OrganizationValidator, retrieve(config, userID, "email", user));
+
+    nlohmann::json request;
+    nlohmann::json response;
+
+    auto result = CloudREST::performRESTCall(
+        config, web::Organizations::RetrieveUser, config.authToken, {userID}, request, response);
+
+    if (result.OK()) {
+        user = response;
+    }
+
+    return result;
+}
+
+CloudStatus
+OrganizationREST::updateUser(const CloudConfig& config, const std::string& userID, const std::string& email, const User& user)
+{
+    // Ignore email check for empty, REST call is going to ignore it anyway
+    DFX_CLOUD_VALIDATOR_MACRO(OrganizationValidator, update(config, userID, "email", user));
+
+    nlohmann::json request;
+    nlohmann::json response;
+
+    request = user;
+    auto result = CloudREST::performRESTCall(
+        config, web::Organizations::UpdateUser, config.authToken, {user.id}, request, response);
+
+    return result;
+}
+
+CloudStatus OrganizationREST::removeUser(const CloudConfig& config, const std::string& userID, const std::string& email)
+{
+    DFX_CLOUD_VALIDATOR_MACRO(OrganizationValidator, remove(config, userID, email));
+
+    nlohmann::json request;
+    nlohmann::json response;
+
+    auto result = CloudREST::performRESTCall(
+        config, web::Organizations::RemoveUser, config.authToken, {userID}, request, response);
+
+    return result;
 }

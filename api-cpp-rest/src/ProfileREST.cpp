@@ -12,20 +12,24 @@
 
 using namespace dfx::api;
 using namespace dfx::api::rest;
-using nlohmann::json;
 
 CloudStatus
 ProfileREST::create(const CloudConfig& config, const std::string& name, const std::string& email, Profile& profile)
 {
     DFX_CLOUD_VALIDATOR_MACRO(ProfileValidator, create(config, name, email, profile));
 
-    json response, request = {{"Name", name}, {"Email", email}};
-    auto status = CloudREST::performRESTCall(config, web::Profiles::Create, config.authToken, {}, request, response);
-    if (status.OK()) {
+    nlohmann::json request = {{"Name", name}, {"Email", email}};
+    nlohmann::json response;
+
+    // https://dfxapiversion10.docs.apiary.io/#reference/0/profiles/create-profile
+    auto result = CloudREST::performRESTCall(config, web::Profiles::Create, config.authToken, {}, request, response);
+
+    if (result.OK()) {
         auto profileID = response["ID"].get<std::string>();
         return retrieve(config, profileID, profile);
     }
-    return status;
+
+    return result;
 }
 
 CloudStatus ProfileREST::list(const CloudConfig& config,
@@ -38,7 +42,6 @@ CloudStatus ProfileREST::list(const CloudConfig& config,
 
     totalCount = -1; // Return unknown -1, zero would be a literal zero
 
-    // REST: https://dfxapiversion10.docs.apiary.io/#reference/0/profiles/list-profiles
     std::string accountID;
     std::stringstream urlQuery;
     for (auto& filter : filters) {
@@ -58,16 +61,19 @@ CloudStatus ProfileREST::list(const CloudConfig& config,
     }
     urlQuery << "Offset=" << offset;
 
-    json response, request;
-    CloudStatus status(CLOUD_OK);
+    nlohmann::json request;
+    nlohmann::json response;
+    CloudStatus result(CLOUD_OK);
     if (accountID.empty()) {
-        status = CloudREST::performRESTCall(
+        // https://dfxapiversion10.docs.apiary.io/#reference/0/profiles/list-profiles
+        result = CloudREST::performRESTCall(
             config, web::Profiles::List, config.authToken, {}, urlQuery.str(), request, response);
     } else {
-        status = CloudREST::performRESTCall(
+        // https://dfxapiversion10.docs.apiary.io/#reference/0/profiles/list-profiles-by-user
+        result = CloudREST::performRESTCall(
             config, web::Profiles::ListByUser, config.authToken, {accountID}, urlQuery.str(), request, response);
     }
-    if (status.OK()) {
+    if (result.OK()) {
         if (!response.empty()) {
             std::vector<Profile> profilesTemp = response;
             profiles.insert(profiles.end(), profilesTemp.begin(), profilesTemp.end());
@@ -81,16 +87,22 @@ CloudStatus ProfileREST::list(const CloudConfig& config,
             }
         }
     }
-    return status;
+
+    return result;
 }
 
 CloudStatus ProfileREST::retrieve(const CloudConfig& config, const std::string& profileID, Profile& profile)
 {
     DFX_CLOUD_VALIDATOR_MACRO(ProfileValidator, retrieve(config, profileID, profile));
-    json response, request;
-    auto status =
+
+    nlohmann::json request;
+    nlohmann::json response;
+
+    // https://dfxapiversion10.docs.apiary.io/#reference/0/profiles/retrieve-profile
+    auto result =
         CloudREST::performRESTCall(config, web::Profiles::Retrieve, config.authToken, {profileID}, request, response);
-    if (status.OK()) {
+
+    if (result.OK()) {
         if (!response.is_array()) {
             profile = response; // Must be a map of one value
             profile.id = profileID;
@@ -115,29 +127,28 @@ CloudStatus ProfileREST::retrieve(const CloudConfig& config, const std::string& 
         }
     }
 
-    return status;
+    return result;
 }
 
 CloudStatus ProfileREST::update(const CloudConfig& config, const Profile& profile)
 {
     DFX_CLOUD_VALIDATOR_MACRO(ProfileValidator, update(config, profile));
-    json response, request = {{"Name", profile.name},
-                              {"Email", profile.email},
-                              {"Status", ProfileStatusMapper::getString(profile.status)}};
-    auto Status =
-        CloudREST::performRESTCall(config, web::Profiles::Update, config.authToken, {profile.id}, request, response);
 
-    return Status;
+    nlohmann::json request = {
+        {"Name", profile.name}, {"Email", profile.email}, {"Status", ProfileStatusMapper::getString(profile.status)}};
+    nlohmann::json response;
+
+    // https://dfxapiversion10.docs.apiary.io/#reference/0/profiles/update-profile
+    return CloudREST::performRESTCall(config, web::Profiles::Update, config.authToken, {profile.id}, request, response);
 }
 
 CloudStatus ProfileREST::remove(const CloudConfig& config, const std::string& profileID)
 {
     DFX_CLOUD_VALIDATOR_MACRO(ProfileValidator, remove(config, profileID));
 
-    json response, request;
+    nlohmann::json request;
+    nlohmann::json response;
 
-    auto status =
-        CloudREST::performRESTCall(config, web::Profiles::Remove, config.authToken, {profileID}, request, response);
-
-    return status;
+    // https://dfxapiversion10.docs.apiary.io/#reference/0/profiles/remove-profile
+    return CloudREST::performRESTCall(config, web::Profiles::Remove, config.authToken, {profileID}, request, response);
 }

@@ -1,0 +1,10 @@
+include(host-default)
+
+[settings]
+arch=armv7
+
+# iOS 10 is the maximum deployment target for 32-bit targets
+os.version=10.0
+
+[options]
+ios-cmake/*:toolchain_target=OS

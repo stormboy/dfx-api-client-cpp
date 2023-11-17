@@ -1,0 +1,8 @@
+include(host-default)
+
+[settings]
+arch=armv8
+os.sdk=iphonesimulator
+
+[options]
+ios-cmake/*:toolchain_target=SIMULATOR64

@@ -44,14 +44,6 @@ public:
 
     CloudStatus update(const CloudConfig& config, const User& user) override;
 
-    CloudStatus
-    retrieve(const CloudConfig& config, const std::string& userID, const std::string& email, User& user) override;
-
-    CloudStatus
-    update(const CloudConfig& config, const std::string& userID, const std::string& email, const User& user) override;
-
-    CloudStatus remove(const CloudConfig& config, const std::string& userID, const std::string& email) override;
-
     CloudStatus reqLoginCode(const CloudConfig& config,
                              const std::string& sOrgKey,
                              const std::string& sPhoNum) override;

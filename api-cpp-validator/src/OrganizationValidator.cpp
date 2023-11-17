@@ -69,3 +69,38 @@ CloudStatus OrganizationValidator::remove(const CloudConfig& config, const std::
     MACRO_RETURN_ERROR_IF_EMPTY(organizationID);
     return CloudStatus(CLOUD_OK);
 }
+
+CloudStatus OrganizationValidator::listUsers(const CloudConfig& config,
+                                        const std::unordered_map<dfx::api::UserAPI::UserFilter, std::string>& filters,
+                                        uint16_t offset,
+                                        std::vector<User>& users,
+                                        int16_t& totalCount) {
+    MACRO_RETURN_ERROR_IF_NO_USER_TOKEN(config);
+    return CloudStatus(CLOUD_OK);
+}
+
+CloudStatus
+OrganizationValidator::retrieveUser(const CloudConfig& config, const std::string& userID, const std::string& email, User& user)
+{
+    MACRO_RETURN_ERROR_IF_NO_USER_TOKEN(config);
+    MACRO_RETURN_ERROR_IF_EMPTY(userID);
+    MACRO_RETURN_ERROR_IF_EMPTY(email);
+    return CloudStatus(CLOUD_OK);
+}
+
+CloudStatus
+OrganizationValidator::updateUser(const CloudConfig& config, const std::string& userID, const std::string& email, const User& user)
+{
+    MACRO_RETURN_ERROR_IF_NO_USER_TOKEN(config);
+    MACRO_RETURN_ERROR_IF_EMPTY(userID);
+    MACRO_RETURN_ERROR_IF_EMPTY(email);
+    return CloudStatus(CLOUD_OK);
+}
+
+CloudStatus OrganizationValidator::removeUser(const CloudConfig& config, const std::string& userID, const std::string& email)
+{
+    MACRO_RETURN_ERROR_IF_NO_USER_TOKEN(config);
+    MACRO_RETURN_ERROR_IF_EMPTY(userID);
+    MACRO_RETURN_ERROR_IF_EMPTY(email);
+    return CloudStatus(CLOUD_OK);
+}

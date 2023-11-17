@@ -1,0 +1,122 @@
+/*
+ *              Copyright (c) 2016-2019, Nuralogix Corp.
+ *                      All Rights reserved
+ *
+ *      THIS SOFTWARE IS LICENSED BY AND IS THE CONFIDENTIAL AND
+ *      PROPRIETARY PROPERTY OF NURALOGIX CORP. IT IS
+ *      PROTECTED UNDER THE COPYRIGHT LAWS OF THE USA, CANADA
+ *      AND OTHER FOREIGN COUNTRIES. THIS SOFTWARE OR ANY
+ *      PART THEREOF, SHALL NOT, WITHOUT THE PRIOR WRITTEN CONSENT
+ *      OF NURALOGIX CORP, BE USED, COPIED, DISCLOSED,
+ *      DECOMPILED, DISASSEMBLED, MODIFIED OR OTHERWISE TRANSFERRED
+ *      EXCEPT IN ACCORDANCE WITH THE TERMS AND CONDITIONS OF A
+ *      NURALOGIX CORP SOFTWARE LICENSE AGREEMENT.
+ */
+syntax = "proto3";
+
+option cc_enable_arenas = true;
+option java_package = "ai.nuralogix.dfx";
+option java_outer_classname = "Profiles";
+
+package dfx.proto.profiles;
+
+service Services {
+  rpc Create     (CreateRequest)     returns (CreateResponse)     {}
+  rpc Retrieve   (RetrieveRequest)   returns (RetrieveResponse)   {}
+  rpc Update     (UpdateRequest)     returns (UpdateResponse)     {}
+  rpc Remove     (RemoveRequest)     returns (RemoveResponse)     {}
+  rpc List       (ListRequest)       returns (ListResponse)       {}
+  rpc ListByUser (ListByUserRequest) returns (ListByUserResponse) {}
+}
+
+// Create
+message CreateRequest {
+  string Name = 1;
+  string Email = 2;
+}
+message CreateResponse {
+  string ID = 1;
+}
+
+// Update
+message UpdateRequest {
+  message ParamValues {
+    string ID = 1;
+  }
+  string Name = 1;
+  string Email = 2;
+  string Status = 3;
+  ParamValues Params = 4;
+}
+message UpdateResponse {}
+
+// Retrieve
+message RetrieveRequest {
+  message ParamValues {
+    string ID = 1;
+  }
+  ParamValues Params = 1;
+}
+message RetrieveResponse {
+  string Name = 1;
+  string Email = 2;
+  string Status = 3;
+  uint32 Created = 4;
+  uint32 Updated = 5;
+}
+
+// Remove
+message RemoveRequest {
+  message ParamValues {
+    string ID = 1;
+  }
+  ParamValues Params = 1;
+}
+message RemoveResponse {}
+
+// List
+message ListRequest {
+  message QueryValues {
+    uint32 Limit = 1;
+    uint32 Offset = 2;
+    string UserProfileName = 3;
+    string UserEmail = 4;
+  }
+  QueryValues Query = 1;
+}
+message ListResponse {
+  message Profile {
+    string ID = 1;
+    string Name = 2;
+    string Email = 3;
+    string Status = 4;
+    uint32 Created = 5;
+    uint32 Updated = 6;
+  }
+  repeated Profile Values = 1;
+}
+
+// List By User
+message ListByUserRequest {
+  message ParamValues {
+    string ID = 1;
+  }
+  message QueryValues {
+    uint32 Limit = 1;
+    uint32 Offset = 2;
+    string UserProfileName = 3;
+  }
+  ParamValues Params = 1;
+  QueryValues Query = 2;
+}
+message ListByUserResponse {
+  message Profile {
+    string ID = 1;
+    string Name = 2;
+    string Email = 3;
+    string Status = 4;
+    uint32 Created = 5;
+    uint32 Updated = 6;
+  }
+  repeated Profile Values = 1;
+}

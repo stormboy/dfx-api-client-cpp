@@ -85,6 +85,31 @@ public:
 
     /**
      * \~english
+     * The Authentication MFA Token.
+     *
+     * For User Login requests the auth MFA token is required if multi-factor
+     * authntication enabled for the user.
+     */
+    std::string authMFAToken;
+
+    /**
+     * \~english
+     * The Device Authentication Refresh Token.
+     *
+     * For Device register requests a Refresh Token is provided.
+     */
+    std::string deviceRefreshToken;
+
+    /**
+     * \~english
+     * The User Authentication Refresh Token.
+     *
+     * For User login requests a Refresh Token is provided.
+     */
+    std::string userRefreshToken;
+
+    /**
+     * \~english
      * The Authentication Organization.
      *
      * For User Login requests the auth organization is required.

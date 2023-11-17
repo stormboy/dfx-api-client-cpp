@@ -1,0 +1,11 @@
+include(default)
+
+# Above will source the USER ~/.conan2/profiles/default which should ideally be
+# a very basic definition of the platform as created by a new install of conan
+
+# This is a place to put common build profile items which are specific to this project
+
+# libdfx2 requires 3.24+ (for dependency providers)
+# https://docs.conan.io/1/devtools/build_requires.html#declaring-tool-requirements
+[tool_requires]
+*: cmake/3.26.3

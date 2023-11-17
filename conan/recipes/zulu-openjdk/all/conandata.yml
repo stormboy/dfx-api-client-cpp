@@ -1,0 +1,73 @@
+#  zulu8.70.0.23-ca-jdk8.0.372-linux_musl_aarch64.tar.gz
+sources:
+  "8.70.0.23":
+    "Windows":
+      "x86_64":
+        url: "https://cdn.azul.com/zulu/bin/zulu8.70.0.23-ca-jdk8.0.372-win_x64.zip"
+        sha256: "d783b5fe4ef5d798f5b54bbffcb056fa183768d8a4f7e8b138a690b5a875ed3e"
+    "Linux":
+      "x86_64":
+        url: "https://cdn.azul.com/zulu/bin/zulu8.70.0.23-ca-jdk8.0.372-linux_x64.tar.gz"
+        sha256: "afcda0f08cd05efd3bd60b021618931595ab03689f1c1fefcd46ef7761276d10"
+      "armv8":
+        url: "https://cdn.azul.com/zulu/bin/zulu8.70.0.23-ca-jdk8.0.372-linux_musl_aarch64.tar.gz"
+        sha256: "9405532a17ec56195a43b9c27157584b3ca3f0a3275b99e4df0a2bbebf2a5628"
+    "Macos":
+      "x86_64":
+        url: "https://cdn.azul.com/zulu/bin/zulu8.70.0.23-ca-jdk8.0.372-macosx_x64.tar.gz"
+        sha256: "d35a7bedfb3dde69701d27b7df6100143c5617d5fee746acb3d845311a9573af"
+      "armv8":  
+        url: "https://cdn.azul.com/zulu/bin/zulu8.70.0.23-ca-jdk8.0.372-macosx_aarch64.tar.gz"
+        sha256: "ae68ae6a93d1d9952e5ff096f6612eea486846a8506e30dec3dd3b3e52b9d005"
+  "8.0.144":
+    "Windows":
+      "x86_64":
+        url: "https://cdn.azul.com/zulu/bin/zulu8.23.0.3-jdk8.0.144-win_x64.zip"
+        sha256: "f1d9d3341ef7c8c9baff3597953e99a6a7c64f8608ee62c03fdd7574b7655c02"
+    "Linux":
+      "x86_64":
+        url: "https://cdn.azul.com/zulu/bin/zulu8.23.0.3-jdk8.0.144-linux_x64.tar.gz"
+        sha256: "7e6284739c0e5b7142bc7a9adc61ced70dc5bb26b130b582b18e809013bcb251"
+    "Macos":
+      "x86_64":
+        url: "https://cdn.azul.com/zulu/bin/zulu8.23.0.3-jdk8.0.144-macosx_x64.tar.gz"
+        sha256: "045493b853410197fbbd4489f7d6ed00b211ce6e1151bea1436f45756bf59afd"
+  "11.0.12":
+    "Windows":
+      "x86_64":
+        url: "https://cdn.azul.com/zulu/bin/zulu11.50.19-ca-jdk11.0.12-win_x64.zip"
+        sha256: "42ae65e75d615a3f06a674978e1fa85fdf078cad94e553fee3e779b2b42bb015"
+    "Linux":
+      "x86_64":
+        url: "https://cdn.azul.com/zulu/bin/zulu11.50.19-ca-jdk11.0.12-linux_x64.tar.gz"
+        sha256: "b8e8a63b79bc312aa90f3558edbea59e71495ef1a9c340e38900dd28a1c579f3"
+      "armv8":
+        url: "https://cdn.azul.com/zulu-embedded/bin/zulu11.50.19-ca-jdk11.0.12-linux_aarch64.tar.gz"
+        sha256: "61254688067454d3ccf0ef25993b5dcab7b56c8129e53b73566c28a8dd4d48fb"
+    "Macos":
+      "x86_64":
+        url: "https://cdn.azul.com/zulu/bin/zulu11.50.19-ca-jdk11.0.12-macosx_x64.tar.gz"
+        sha256: "0b8c8b7cf89c7c55b7e2239b47201d704e8d2170884875b00f3103cf0662d6d7"
+      "armv8":
+        url: "https://cdn.azul.com/zulu/bin/zulu11.50.19-ca-jdk11.0.12-macosx_aarch64.tar.gz"
+        sha256: "e908a0b4c0da08d41c3e19230f819b364ff2e5f1dafd62d2cf991a85a34d3a17"
+
+  "11.0.15":
+    "Windows":
+      "x86_64":
+        url: "https://cdn.azul.com/zulu/bin/zulu11.56.19-ca-jdk11.0.15-win_x64.zip"
+        sha256: "a106c77389a63b6bd963a087d5f01171bd32aa3ee7377ecef87531390dcb9050"
+    "Linux":
+      "x86_64":
+        url: "https://cdn.azul.com/zulu/bin/zulu11.56.19-ca-jdk11.0.15-linux_x64.tar.gz"
+        sha256: "e064b61d93304012351242bf0823c6a2e41d9e28add7ea7f05378b7243d34247"
+      "armv8":
+        url: "https://cdn.azul.com/zulu-embedded/bin/zulu11.56.19-ca-jdk11.0.15-linux_aarch64.tar.gz"
+        sha256: "fc7c41a0005180d4ca471c90d01e049469e0614cf774566d4cf383caa29d1a97"
+    "Macos":
+      "x86_64":
+        url: "https://cdn.azul.com/zulu/bin/zulu11.56.19-ca-jdk11.0.15-macosx_x64.tar.gz"
+        sha256: "2614e5c5de8e989d4d81759de4c333aa5b867b17ab9ee78754309ba65c7f6f55"
+      "armv8":
+        url: "https://cdn.azul.com/zulu/bin/zulu11.56.19-ca-jdk11.0.15-macosx_aarch64.tar.gz"
+        sha256: "6bb0d2c6e8a29dcd9c577bbb2986352ba12481a9549ac2c0bcfd00ed60e538d2"

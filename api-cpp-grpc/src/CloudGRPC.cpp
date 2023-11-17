@@ -4,15 +4,13 @@
 #include "dfx/auth/v1/auth.grpc.pb.h"
 #include "dfx/devices/v2/devices.grpc.pb.h"
 
-#include "dfx/api/OrganizationAPI.hpp"
-
 #include "dfx/api/grpc/CloudGRPC.hpp"
 #include "dfx/api/grpc/DeviceGRPC.hpp"
 #include "dfx/api/grpc/MeasurementGRPC.hpp"
 #include "dfx/api/grpc/MeasurementStreamGRPC.hpp"
+#include "dfx/api/grpc/OrganizationGRPC.hpp"
 #include "dfx/api/grpc/SignalGRPC.hpp"
 #include "dfx/api/grpc/StudyGRPC.hpp"
-#include "dfx/api/grpc/UserGRPC.hpp"
 #include "dfx/api/validator/CloudValidator.hpp"
 
 #include <ctime>
@@ -228,6 +226,11 @@ CloudStatus CloudGRPC::login(CloudConfig& config)
     return CloudStatus(CLOUD_OK);
 }
 
+CloudStatus CloudGRPC::loginWithToken(CloudConfig& config, std::string& token)
+{
+    return CloudStatus(CLOUD_UNIMPLEMENTED_FEATURE, "loginWithToken not implemented for GRPC");
+}
+
 CloudStatus CloudGRPC::logout(CloudConfig& config)
 {
     dfx::auth::v1::LogoutResponse response;
@@ -243,7 +246,11 @@ CloudStatus CloudGRPC::logout(CloudConfig& config)
     return CloudStatus(CLOUD_OK);
 }
 
-CloudStatus CloudGRPC::registerDevice(CloudConfig& config, const std::string& appName, const std::string& appVersion)
+CloudStatus CloudGRPC::registerDevice(CloudConfig& config,
+                                      const std::string& appName,
+                                      const std::string& appVersion,
+                                      const uint16_t tokenExpiresInSeconds,
+                                      const std::string& tokenSubject)
 {
     DFX_CLOUD_VALIDATOR_MACRO(CloudValidator, registerDevice(config, appName, appVersion));
 
@@ -314,27 +321,27 @@ CloudStatus CloudGRPC::unregisterDevice(CloudConfig& config)
     return CloudStatus(CLOUD_OK);
 }
 
-CloudStatus CloudGRPC::validateToken(const CloudConfig& config, const std::string& userToken)
+CloudStatus CloudGRPC::verifyToken(const CloudConfig& config, std::string& _response)
 {
-    DFX_CLOUD_VALIDATOR_MACRO(CloudValidator, validateToken(config, userToken));
+    DFX_CLOUD_VALIDATOR_MACRO(CloudValidator, verifyToken(config));
 
     auto grpcAuth = dfx::auth::v1::API::NewStub(getChannel(config));
 
     dfx::auth::v1::ValidateTokenRequest request;
-    request.set_token(userToken);
+    request.set_token(config.authToken);
     request.set_organization_identifier(config.authOrg);
-    dfx::auth::v1::ValidateTokenResponse response;
+    dfx::auth::v1::ValidateTokenResponse protoResponse;
 
     ClientContext context;
     initializeClientContext(config, context, "");
 
-    MACRO_RETURN_ERROR_IF_GRPC_STATUS_NOT_OK(grpcAuth->ValidateToken(&context, request, &response));
+    MACRO_RETURN_ERROR_IF_GRPC_STATUS_NOT_OK(grpcAuth->ValidateToken(&context, request, &protoResponse));
 
-    if (response.has_valid_until()) {
+    if (protoResponse.has_valid_until()) {
         time_t currentTime;
         time(&currentTime);
 
-        auto tokenTime = google::protobuf::util::TimeUtil::TimestampToTimeT(response.valid_until());
+        auto tokenTime = google::protobuf::util::TimeUtil::TimestampToTimeT(protoResponse.valid_until());
 
         if (difftime(tokenTime, currentTime) > 0) {
             return CloudStatus(CLOUD_OK);
@@ -344,6 +351,11 @@ CloudStatus CloudGRPC::validateToken(const CloudConfig& config, const std::strin
     }
 
     return CloudStatus(CLOUD_INTERNAL_ERROR, "Token missing value");
+}
+
+CloudStatus CloudGRPC::renewToken(const CloudConfig& config, std::string& token, std::string& refreshToken)
+{
+    return CloudStatus(CLOUD_UNSUPPORTED_FEATURE, "renewToken not supported for GRPC");
 }
 
 CloudStatus CloudGRPC::switchEffectiveOrganization(CloudConfig& config, const std::string& organizationID)
@@ -382,6 +394,11 @@ std::shared_ptr<MeasurementStreamAPI> CloudGRPC::measurementStream(const CloudCo
     return std::make_shared<MeasurementStreamGRPC>(config, std::static_pointer_cast<CloudGRPC>(shared_from_this()));
 }
 
+std::shared_ptr<OrganizationAPI> CloudGRPC::organization(const CloudConfig& config)
+{
+    return std::make_shared<OrganizationGRPC>(config, std::static_pointer_cast<CloudGRPC>(shared_from_this()));
+}
+
 std::shared_ptr<SignalAPI> CloudGRPC::signal(const CloudConfig& config)
 {
     return std::make_shared<SignalGRPC>(config, std::static_pointer_cast<CloudGRPC>(shared_from_this()));
@@ -390,11 +407,6 @@ std::shared_ptr<SignalAPI> CloudGRPC::signal(const CloudConfig& config)
 std::shared_ptr<StudyAPI> CloudGRPC::study(const CloudConfig& config)
 {
     return std::make_shared<StudyGRPC>(config, std::static_pointer_cast<CloudGRPC>(shared_from_this()));
-}
-
-std::shared_ptr<UserAPI> CloudGRPC::user(const CloudConfig& config)
-{
-    return std::make_shared<UserGRPC>(config, std::static_pointer_cast<CloudGRPC>(shared_from_this()));
 }
 
 std::shared_ptr<::grpc::Channel> CloudGRPC::getChannel(const CloudConfig& config)
@@ -420,7 +432,7 @@ const std::string& CloudGRPC::getTransportType()
     return CloudAPI::TRANSPORT_TYPE_GRPC;
 }
 
-CloudStatus CloudGRPC::getServerStatus(CloudConfig& config)
+CloudStatus CloudGRPC::getServerStatus(CloudConfig& config, std::string& response)
 {
     auto channel = getChannel(config);
     if (channel) {

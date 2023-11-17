@@ -7,7 +7,9 @@ and the [CMake](https://cmake.org/) build system. It needs *both* Conan and
 CMake to build the library, but can be built by either Conan or CMake. Deciding
 if Conan or CMake should build the library is related to how you will consume
 the library. We also recommend that you use
-[Just](https://github.com/casey/just) to automate the build steps.
+[Just](https://github.com/casey/just) to automate the build steps along with
+[nushell](https://github.com/nushell/nushell) to avoid the need of handling
+platform script differences.
 
 *Conan* is a tool for managing C++ dependencies and if you are writing an
 application which depends on this library and is using Conan already, it is
@@ -33,14 +35,17 @@ but can be done via source as well:
 brew install conan
 brew install cmake
 brew install just
+brew install nu
 ```
 
 ### Windows (using https://scoop.sh/)
 
 ```bash
-scoop install conan   # OR choco install conan OR winget install conan
-scoop install cmake   # OR choco install cmake OR winget install cmake
-scoop install just    # OR manually download and place Just in your PATH
+scoop bucket add main
+scoop install main/conan   # OR choco install conan OR winget install conan
+scoop install main/cmake   # OR choco install cmake OR winget install cmake
+scoop install main/just    # OR manually download and place Just in your PATH
+scoop install main/nu      # OR manually download and place nu in your PATH
 ```
 
 ### Ubuntu
@@ -52,18 +57,13 @@ python3 -m venv venv         # Create Python virtual environment
 source venv/bin/activate     # Activate virtual environment
 pip install conan            # Install Conan in the virtual environment
 pip install cmake            # Install CMake in the virtual environment
-wget https://github.com/casey/just/releases/download/1.1.0/just-1.1.0-x86_64-unknown-linux-musl.tar.gz
-tar xvzf just-1.1.0-x86_64-unknown-linux-musl.tar.gz just
-mv just ~/.local/bin        # Assuming ~/.local/bin is in PATH
-```
 
-## Configuring Conan to use the NuraLogix remote
+ # Assuming ~/.local/bin is in PATH, install just and nu
+wget -O - https://github.com/casey/just/releases/download/1.14.0/just-1.14.0-x86_64-unknown-linux-musl.tar.gz 2>/dev/null | \
+          tar -xz -C ~/.local/bin just
 
-To retrieve packages which are hosted by NuraLogix you will need to add the
-following Conan remote,
-
-```bash
-conan remote add nuralogix https://artifactory.na-east.nuralogix.ai/artifactory/api/conan/conan
+wget -O - https://github.com/nushell/nushell/releases/download/0.82.0/nu-0.82.0-x86_64-unknown-linux-musl.tar.gz 2>/dev/null | \
+          tar -xz -C ~/.local/bin --strip-components=1 nu-0.82.0-x86_64-unknown-linux-musl/nu
 ```
 
 ## Building with `Just`
@@ -73,6 +73,8 @@ You will need to invoke it from a Unix shell with access to the compilers on
 your platform. (On Windows, this would be the Git Bash shell.)
 
 ```bash
+just export      # Export all the conan required conan packages to conan cache
+
 just build       # Build library (default type=Debug)
 
 just             # Display help list of defaults/options

@@ -30,7 +30,7 @@ if(MSVC)
   target_compile_options(api-protos-web PUBLIC /utf-8)
 endif()
 
-target_link_libraries(api-protos-web protobuf::protobuf)
+target_link_libraries(api-protos-web protobuf::protobuf dfxprotosweb::dfxprotosweb)
 
 target_include_directories(
   api-protos-web

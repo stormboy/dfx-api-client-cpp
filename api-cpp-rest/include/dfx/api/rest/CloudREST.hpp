@@ -37,20 +37,28 @@ public:
 
     const std::string& getTransportType() override;
 
-    CloudStatus getServerStatus(CloudConfig& config) override;
+    CloudStatus getServerStatus(CloudConfig& config, std::string& response) override;
 
     // *********************************************************************************
     // AUTHENTICATION SECTION
     // *********************************************************************************
     CloudStatus login(CloudConfig& config) override;
 
+    CloudStatus loginWithToken(CloudConfig& config, std::string& token) override;
+
     CloudStatus logout(CloudConfig& config) override;
 
-    CloudStatus registerDevice(CloudConfig& config, const std::string& appName, const std::string& appVersion) override;
+    CloudStatus registerDevice(CloudConfig& config,
+                               const std::string& appName,
+                               const std::string& appVersion,
+                               const uint16_t tokenExpiresInSeconds,
+                               const std::string& tokenSubject) override;
 
     CloudStatus unregisterDevice(CloudConfig& config) override;
 
-    CloudStatus validateToken(const CloudConfig& config, const std::string& userToken) override;
+    CloudStatus verifyToken(const CloudConfig& config, std::string& response) override;
+
+    CloudStatus renewToken(const CloudConfig& config, std::string& token, std::string& refreshToken) override;
 
     CloudStatus switchEffectiveOrganization(CloudConfig& config, const std::string& organizationID) override;
 
@@ -92,6 +100,8 @@ private:
     friend class StudyREST;
 
     friend class UserREST;
+
+    std::string getAuthToken(const CloudConfig& config);
 
 protected:
     static CloudStatus performRESTCall(const CloudConfig& config,

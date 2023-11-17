@@ -1,0 +1,67 @@
+/*
+ *              Copyright (c) 2016-2019, Nuralogix Corp.
+ *                      All Rights reserved
+ *
+ *      THIS SOFTWARE IS LICENSED BY AND IS THE CONFIDENTIAL AND
+ *      PROPRIETARY PROPERTY OF NURALOGIX CORP. IT IS
+ *      PROTECTED UNDER THE COPYRIGHT LAWS OF THE USA, CANADA
+ *      AND OTHER FOREIGN COUNTRIES. THIS SOFTWARE OR ANY
+ *      PART THEREOF, SHALL NOT, WITHOUT THE PRIOR WRITTEN CONSENT
+ *      OF NURALOGIX CORP, BE USED, COPIED, DISCLOSED,
+ *      DECOMPILED, DISASSEMBLED, MODIFIED OR OTHERWISE TRANSFERRED
+ *      EXCEPT IN ACCORDANCE WITH THE TERMS AND CONDITIONS OF A
+ *      NURALOGIX CORP SOFTWARE LICENSE AGREEMENT.
+ */
+syntax = "proto3";
+
+option cc_enable_arenas = true;
+option java_package = "ai.nuralogix.dfx.processqueue.v1";
+option java_outer_classname = "ProcessQueue";
+option go_package = "bitbucket.org/nuralogix/dfx-protobuffs-go/dfx/processqueue/v1;processqueue";
+option csharp_namespace = "Nuralogix.Dfx.ProcessQueue.V1";
+
+package dfx.processqueue.v1;
+
+service API {
+   rpc Add(AddRequest) returns (AddResponse) {}
+   rpc Cancel(CancelRequest) returns (CancelResponse) {}
+   rpc Retrieve(RetrieveRequest) returns (RetrieveResponse) {}
+   rpc Remove(RemoveRequest) returns (RemoveResponse) {}
+}
+
+message AddRequest {
+   repeated MeasurementStudy measurement_studies = 1;
+}
+message AddResponse {
+   uint32 num_added_items = 1;
+   uint32 queue_size = 2; // queue_size after addition of new items
+}
+
+message CancelRequest {}
+message CancelResponse {
+   uint32 num_deleted_items = 1;
+   uint32 queue_size = 2; // if queue_size > 0, then there are tasks running by other users that cannot be cancelled
+}
+
+message RetrieveRequest {}
+message RetrieveResponse {
+   message Info {
+      MeasurementStudy measurement_study = 1;
+      uint32 progress_percentage = 2;
+   }
+   repeated Info queued = 1; // all tasks in the process queue
+   repeated Info in_progress = 2; // all tasks that are being processed
+}
+
+message RemoveRequest {
+   repeated MeasurementStudy measurement_studies = 1;
+}
+message RemoveResponse {
+   uint32 num_deleted_items = 1;
+   uint32 queue_size = 2; // if queue_size > 0, then there are tasks running by other users that cannot be cancelled
+}
+
+message MeasurementStudy {
+   string measurement_id = 1;
+   string study_id = 2;
+}

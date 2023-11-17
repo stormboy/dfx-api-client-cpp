@@ -1,0 +1,192 @@
+/*
+ *              Copyright (c) 2016-2019, Nuralogix Corp.
+ *                      All Rights reserved
+ *
+ *      THIS SOFTWARE IS LICENSED BY AND IS THE CONFIDENTIAL AND
+ *      PROPRIETARY PROPERTY OF NURALOGIX CORP. IT IS
+ *      PROTECTED UNDER THE COPYRIGHT LAWS OF THE USA, CANADA
+ *      AND OTHER FOREIGN COUNTRIES. THIS SOFTWARE OR ANY
+ *      PART THEREOF, SHALL NOT, WITHOUT THE PRIOR WRITTEN CONSENT
+ *      OF NURALOGIX CORP, BE USED, COPIED, DISCLOSED,
+ *      DECOMPILED, DISASSEMBLED, MODIFIED OR OTHERWISE TRANSFERRED
+ *      EXCEPT IN ACCORDANCE WITH THE TERMS AND CONDITIONS OF A
+ *      NURALOGIX CORP SOFTWARE LICENSE AGREEMENT.
+ */
+syntax = "proto3";
+
+import "google/protobuf/struct.proto";
+option cc_enable_arenas = true;
+option java_package = "ai.nuralogix.dfx";
+option java_outer_classname = "Studies";
+
+package dfx.proto.studies;
+
+service Services {
+  rpc Types     (TypesRequest)     returns (TypesResponse)     {}
+  rpc Create    (CreateRequest)    returns (CreateResponse)    {}
+  rpc Update    (UpdateRequest)    returns (UpdateResponse)    {}
+  rpc Retrieve  (RetrieveRequest)  returns (RetrieveResponse)  {}
+  rpc Remove    (RemoveRequest)    returns (RemoveResponse)    {}
+  rpc Templates (TemplatesRequest) returns (TemplatesResponse) {}
+  rpc Signals   (SignalsRequest)   returns (SignalsResponse)   {}
+  rpc List      (ListRequest)      returns (ListResponse)      {}
+  rpc Assets    (AssetsRequest)    returns (AssetsResponse)    {}
+  rpc GetConfig (GetConfigRequest) returns (GetConfigResponse) {}
+  rpc GetConfigHash (GetConfigHashRequest) returns (GetConfigHashResponse) {}
+}
+
+// Config File Hash
+message GetConfigHashRequest {
+  string StudyID = 1;
+  string SDKID = 2;
+}
+message GetConfigHashResponse {
+  string MD5Hash = 2;
+}
+
+// Config
+message GetConfigRequest {
+  string StudyID = 1;
+  string SDKID = 2;
+}
+message GetConfigResponse {
+  string ConfigFile = 1; // base64 string
+  string MD5Hash = 2;
+}
+
+// Types
+message TypesRequest {}
+message TypesResponse {
+  message Type {
+    string ID = 1;
+    string StatusID = 2;
+    string Name = 3;
+    string Description = 4;
+    repeated string StudyTemplates = 5;
+  }
+  repeated Type Values = 1;
+}
+
+// Create
+message CreateRequest {
+  string Name = 1;
+  string Description = 2;
+  string StudyTemplateID = 3;
+  map<string, string> Config = 4;
+}
+message CreateResponse {
+  string ID = 1;
+}
+
+// Update
+message UpdateRequest {
+  message ParamValues {
+    string ID = 1;
+  }
+  string Name = 1;
+  string Description = 2;
+  string StatusID = 3;
+  map<string, string> Config = 4;
+  ParamValues Params = 5;
+}
+message UpdateResponse {}
+
+// List
+message ListRequest {}
+message ListResponse {
+  message Study {
+    string ID = 1;
+    string Name = 2;
+    string Description = 3;
+    uint32 Measurements = 4;
+    string StatusID = 5;
+    uint32 Created = 6;
+    uint32 Updated = 7;
+    uint32 Participants = 8;
+    string StudyTemplateID = 9;
+  }
+  repeated Study Values = 1;
+}
+
+// List
+message RetrieveRequest {
+  message ParamValues {
+    string ID = 1;
+  }
+  ParamValues Params = 1;
+}
+message RetrieveResponse {
+  string ID = 1;
+  string Name = 2;
+  string Description = 3;
+  string StatusID = 4;
+  string StudyTemplateID = 5;
+  string StudyTemplateName = 6;
+  uint32 Measurements = 7;
+  uint32 Participants = 8;
+  google.protobuf.Struct Signals = 9;
+  uint32 Created = 10;
+  uint32 Updated = 11;
+
+}
+
+// Templates
+message TemplatesRequest {}
+message TemplatesResponse {
+  message Template {
+    string ID = 1;
+    string Name = 2;
+    string StatusID = 3;
+    string Description = 4;
+    map<string, string> Program = 5;
+    map<string, string> Config = 6;
+    string StudyTypeID = 7;
+    repeated string Signals = 8;
+    uint32 Created = 9;
+  }
+  repeated Template Values = 1;
+}
+
+// Signals
+message SignalsRequest {
+  message ParamValues {
+    string ID = 1;
+  }
+  ParamValues Params = 1;
+}
+message SignalsResponse {
+  message Signal {
+    string ID = 1;
+    string Version = 2;
+    string Name = 3;
+    string Description = 4;
+    uint32 CaptureTimeMinimum = 5;
+    uint32 ResultTimeMinimum = 6;
+  }
+  repeated Signal Values = 1;
+}
+
+// Delete
+message RemoveRequest {
+  message ParamValues {
+    string ID = 1;
+  }
+  ParamValues Params = 1;
+}
+message RemoveResponse {}
+
+// Assets
+message AssetsRequest {
+  message ParamValues {
+    string ID = 1;
+  }
+  ParamValues Params = 1;
+}
+message AssetsResponse {
+  message Asset {
+    string ID = 1;
+    string MimeTypeID = 2;
+    string URI = 3;
+  }
+  repeated Asset Values = 1;
+}

@@ -1,0 +1,29 @@
+set shell := ['nu', '-c']
+set positional-arguments
+
+export package:="protomatlabdoxygen"
+
+_default:
+    @{{just_executable()}} -f {{justfile()}} --list --unsorted
+
+# Create the package for Conan V2
+build:
+    mkdir license; mkdir bin; \
+    rm -rf tmp; mkdir tmp; cd tmp; \
+    git clone https://github.com/aphysci/proto-matlab-doxygen; cd proto-matlab-doxygen; git checkout master; \
+    let date = ( git log -1 --format=%ad --date=format:'%Y%m%d' ); \
+    let revision = ( git rev-parse HEAD | str substring 0..7 ); \
+    let version = ( $date + "_" + $revision ); \
+    cd ..; \
+    cd ..; \
+    cp tmp/proto-matlab-doxygen/m2cpp.pl bin/m2cpp.pl; \
+    cp tmp/proto-matlab-doxygen/proto2cpp.py bin/proto2cpp.py; \
+    cp tmp/proto-matlab-doxygen/lgpl-2.1.txt license/proto-matlab-doxygen-lgpl-2.1.txt; \
+    cp tmp/proto-matlab-doxygen/license.txt license/proto-matlab-doxygen-license.txt; \
+    rm -rf tmp; \
+    echo "#!/bin/sh\n" | save export.sh -f; \
+    echo ( "time conan export . --name " + $env.package + " --version " + $version ) | save export.sh --append -f; \
+    chmod u+x export.sh; \
+    ./export.sh
+
+
