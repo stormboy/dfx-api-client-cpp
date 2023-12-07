@@ -97,13 +97,18 @@ If you don't want to use `Just`, you can follow the steps below, manually.
 
 ### Installing dependencies using Conan
 
-The most basic way to install dependencies is using standard Conan `install`
-syntax. Expect this to take a while and can be built for both Debug & Release
-targets.
+In order to build the recipes, you will require having all the local recipes
+(from conan/recipes folder) exported to your local conan cache which can be done
+with ```just export``` which uses depenencies.yaml to determine the required
+packages and versions and invokes the appropriate conan export command.
+
+The most basic way to install dependencies into a build folder is using
+standard Conan `install` syntax. Expect this to take a while and can be built
+for both Debug & Release targets.
 
 ```bash
-conan install . -pr:b=default -o dfxcloud:enable_checks=False -if build --build missing -s build_type=Debug
-conan install . -pr:b=default -o dfxcloud:enable_checks=False -if build --build missing -s build_type=Release
+conan install . -pr:b=default -o dfxcloud:enable_checks=False -of build --build missing -s build_type=Debug
+conan install . -pr:b=default -o dfxcloud:enable_checks=False -of build --build missing -s build_type=Release
 ```
 
 This places the built artifact into the Conan cache (~/.conan/data) and may take
