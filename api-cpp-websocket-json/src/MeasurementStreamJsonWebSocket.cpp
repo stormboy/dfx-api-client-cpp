@@ -196,7 +196,8 @@ CloudStatus MeasurementStreamWebSocketJson::sendChunk(const CloudConfig& config,
         cloudLog(CLOUD_LOG_LEVEL_WARNING, "WEB: Send not okay %d: %s", result.code, result.message.c_str());
 
         // Our write failed, connection bad close stream and return status
-        return closeStream();
+        closeStream();
+        return result;
     }
 
     chunksOutstanding++;
