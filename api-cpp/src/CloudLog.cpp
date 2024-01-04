@@ -3,7 +3,9 @@
 
 #include "dfx/api/CloudLog.hpp"
 
+#include <chrono>
 #include <cstdarg>
+#include <ctime>
 #include <iostream>
 #include <stdlib.h>
 
@@ -72,13 +74,21 @@ void dfx::api::cloudLogSetLevel(int logLevel)
 void dfx::api::cloudLog(uint8_t level, const char* format, ...)
 {
     if (cloudLogLevel() >= level) {
+        // Get current time
+        auto now = std::chrono::system_clock::now();
+        auto now_c = std::chrono::system_clock::to_time_t(now);
+
+        // Convert to local time
+        char time_buffer[80];
+        std::strftime(time_buffer, sizeof(time_buffer), "%Y-%m-%d %H:%M:%S", std::localtime(&now_c));
+
         char buffer[1024*100];
         va_list args;
         va_start(args, format);
         vsnprintf(buffer, sizeof buffer, format, args);
         va_end(args);
 
-        std::string levelString("UNKNOWN");
+        std::string levelString("");
         switch (level) {
             case CLOUD_LOG_LEVEL_ERROR:
                 levelString = "ERROR";
@@ -96,6 +106,6 @@ void dfx::api::cloudLog(uint8_t level, const char* format, ...)
                 levelString = "TRACE";
                 break;
         }
-        std::cerr << levelString.c_str() << ": " << buffer << std::flush;
+        std::cerr << levelString.c_str() << " " << time_buffer << ": " << buffer << std::flush;
     }
 }

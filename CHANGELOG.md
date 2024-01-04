@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.0.1]
+ - Changed lws_protocols initialization to have unlimited buffer sizes
+ - Fixed dfxcli remove tokenSubject and fixed log output
+ - Added logging to unhandled WebSocket handleEvents
+ - Added timestamps to CloudLog
+
 ## [2.0.0]
  - BREAKING: CloudAPI::registerDevice() now takes a tokenExpiresInSeconds, tokenSubject
  - BREAKING: CloudAPI::validateToken() renamed to verifyToken() with changed parameters

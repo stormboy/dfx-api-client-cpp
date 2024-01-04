@@ -219,7 +219,7 @@ DFXExitCode MeasurementCreateCommand::execute()
 
         bool isLast = ++count == files.size();
         if (verbose) {
-            std::cout << "Sending: " << file << ", isLast? " << (isLast ? "true" : "false") << std::endl;
+            std::cout << "\nSending: " << file << ", isLast? " << (isLast ? "true" : "false") << std::endl;
         }
         status = measurementStream->sendChunk(config, chunkData, isLast);
         if (status.code != CLOUD_OK) {
@@ -236,7 +236,7 @@ DFXExitCode MeasurementCreateCommand::execute()
     }
 
     if (verbose) {
-        std::cout << "Sending done, waiting for completion" << std::endl;
+        std::cout << "\nSending done, waiting for completion" << std::endl;
     }
     measurementStream->waitForCompletion(config);
     if (verbose) {

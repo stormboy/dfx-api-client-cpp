@@ -144,7 +144,7 @@ DFXExitCode DFXAppCommand::registerDevice(DFXExitCode code)
     // Most end-points require a device token, but some don't need so skip if there is no license provided
     if (config.deviceToken.empty() && !config.license.empty()) {
         uint16_t tokenExpiresInSeconds = 3600;
-        std::string tokenSubject = "https://deepaffex.ai";
+        std::string tokenSubject = "";
         auto status = client->registerDevice(config, appName, appVersion, tokenExpiresInSeconds, tokenSubject);
         if (status.code != CLOUD_OK) {
             outputError(status);

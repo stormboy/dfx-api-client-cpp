@@ -18,8 +18,6 @@ namespace fs = std::filesystem;
 
 // https://github.com/iamscottmoyers/simple-libwebsockets-example/blob/master/client.c
 
-const uint32_t DFX_MAX_PAYLOAD_SIZE = 1 * 1024 * 1024;
-
 using dfx::websocket::WebSocket;
 using dfx::websocket::WebSocketLibWebSocket;
 using dfx::websocket::WebSocketState;
@@ -67,19 +65,24 @@ int WebSocketLibWebSocket::dfx_wss_callback(
 // NOLINTNEXTLINE(modernize-avoid-c-arrays)  suggests using std::array<>
 static struct lws_protocols protocols[] = {
     {
-        "proto",
-        ::dfx_wss_callback,
-        0,
-        DFX_MAX_PAYLOAD_SIZE,
+        .name                  = "proto",            /* Protocol name*/
+        .callback              = ::dfx_wss_callback, /* Protocol callback */
+        .per_session_data_size = 0,                  /* Protocol callback 'userdata' size */
+        .rx_buffer_size        = 0,                  /* Receve buffer size (0 = no restriction) */
+        .id                    = 0,                  /* Protocol Id (version) (optional) */
+        .user                  = NULL,               /* 'User data' ptr, to access in 'protocol callback */
+        .tx_packet_size        = 0                   /* Transmission buffer size restriction (0 = no restriction) */
     },
     {
-        "json",
-        ::dfx_wss_callback,
-        0,
-        DFX_MAX_PAYLOAD_SIZE,
+        .name                  = "json",             /* Protocol name*/
+        .callback              = ::dfx_wss_callback, /* Protocol callback */
+        .per_session_data_size = 0,                  /* Protocol callback 'userdata' size */
+        .rx_buffer_size        = 0,                  /* Receve buffer size (0 = no restriction) */
+        .id                    = 0,                  /* Protocol Id (version) (optional) */
+        .user                  = NULL,               /* 'User data' ptr, to access in 'protocol callback */
+        .tx_packet_size        = 0                   /* Transmission buffer size restriction (0 = no restriction) */
     },
-
-    {nullptr, nullptr, 0, 0} /* terminator */
+    LWS_PROTOCOL_LIST_TERM /* terminator */
 };
 
 WebSocketLibWebSocket::WebSocketLibWebSocket(int logLevel, LogCallback callback)

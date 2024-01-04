@@ -134,6 +134,13 @@ void CloudWebSocketJson::handleEvent(const WebSocketEvent& event)
             }
             case dfx::websocket::WebSocketEventType::CLOSED: {
                 cloudLog(CLOUD_LOG_LEVEL_TRACE, "CloudWebSocketJson::handleEvent(CLOSE) received\n");
+                break;
+            }
+            default: {
+                cloudLog(CLOUD_LOG_LEVEL_TRACE,
+                         "CloudWebSocketJson::handleEvent(UNHANDLED) received %d, %s\n",
+                         event.error.code,
+                         event.error.message.c_str());
             }
         }
     }
