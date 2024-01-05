@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.0.2]
+ - Reverted the lws_protocol intialization change which used C++20 syntax
+   and increased the original buffer size to 10MB (from 1MB).
+
 ## [2.0.1]
  - Changed lws_protocols initialization to have unlimited buffer sizes
  - Fixed dfxcli remove tokenSubject and fixed log output
