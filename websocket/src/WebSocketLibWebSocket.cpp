@@ -81,6 +81,16 @@ static struct lws_protocols protocols[] = {
     LWS_PROTOCOL_LIST_TERM /* terminator */
 };
 
+const uint32_t retry_ms_table[] = {1000, 2000, 3000, 4000, 5000};
+static lws_retry_bo_t retry_bo = {
+    retry_ms_table,	   /* base delay in ms */
+	LWS_ARRAY_SIZE(retry_ms_table),                 /* entries in table */
+	LWS_ARRAY_SIZE(retry_ms_table),		           /* max retries to conceal */
+	30,                /* idle before PING issued */
+	120,                /* idle before hangup conn */
+	20		           /* % additional random jitter */
+};
+
 WebSocketLibWebSocket::WebSocketLibWebSocket(int logLevel, LogCallback callback)
     : context(nullptr), serviceThreadJoined(true)
 {
@@ -197,6 +207,14 @@ void WebSocketLibWebSocket::open(const std::string& inputURL, const std::string&
     ctxCreationInfo.ssl_cert_filepath = nullptr;        // info.server_cert_filepath;
     ctxCreationInfo.ssl_private_key_filepath = nullptr; // info.server_private_key_filepath;
     ctxCreationInfo.options |= LWS_SERVER_OPTION_DO_SSL_GLOBAL_INIT | LWS_SERVER_OPTION_CREATE_VHOST_SSL_CTX;
+    
+    // timeout and retry policy
+    ctxCreationInfo.keepalive_timeout = 30;
+    ctxCreationInfo.ka_time = 20;
+    ctxCreationInfo.ka_probes = 3;
+    ctxCreationInfo.ka_interval = 1;
+    ctxCreationInfo.timeout_secs = 30;
+    ctxCreationInfo.retry_and_idle_policy = &retry_bo;
 
     // Create the context with the info
     context = lws_create_context(&ctxCreationInfo);
@@ -221,6 +239,9 @@ void WebSocketLibWebSocket::open(const std::string& inputURL, const std::string&
         }
 
         clientConnectInfo.pwsi = &wsi; // The created client should be placed here
+        clientConnectInfo.retry_and_idle_policy = &retry_bo;
+        clientConnectInfo.priority = 1;
+        clientConnectInfo.ssl_connection |= LCCSCF_IP_HIGH_RELIABILITY;
 
         // Connect with the client info
         lws_client_connect_via_info(&clientConnectInfo);

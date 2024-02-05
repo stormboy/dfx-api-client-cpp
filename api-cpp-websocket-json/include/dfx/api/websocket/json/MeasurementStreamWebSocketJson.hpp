@@ -30,6 +30,8 @@ public:
 
     CloudStatus sendChunk(const CloudConfig& config, const std::vector<uint8_t>& chunk, bool isLast) override;
 
+    CloudStatus reset(const CloudConfig& config) override;
+
     CloudStatus cancel(const CloudConfig& config) override;
 
 private:
@@ -52,6 +54,7 @@ private:
     bool writerClosedStream;
     bool lastChunkSent;
 
+    std::mutex mutexChunks;
     std::mutex mutexMeasurementID;
     std::condition_variable cvMeasurementID;
     std::string measurementID;

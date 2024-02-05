@@ -162,8 +162,9 @@ CloudStatus MeasurementStreamWebSocketJson::sendChunk(const CloudConfig& config,
     nlohmann::json request;
 
     if (!isLastChunk) {
-        if (chunkOrder == 0) {
+        if (isFirstChunk) {
             request["Action"] = "FIRST::PROCESS";
+            isFirstChunk = false;
         } else {
             request["Action"] = "CHUNK::PROCESS";
         }
@@ -200,9 +201,23 @@ CloudStatus MeasurementStreamWebSocketJson::sendChunk(const CloudConfig& config,
         return result;
     }
 
-    chunksOutstanding++;
+    {
+        const std::lock_guard<std::mutex> lock(mutexChunks);
+        if (isLastChunk) {
+            lastChunkSent = true;
+        }
+        chunksOutstanding++;
+    }
 
     return CloudStatus(CLOUD_OK);
+}
+
+CloudStatus MeasurementStreamWebSocketJson::reset(const CloudConfig& config) 
+{
+    CloudStatus status(CLOUD_OK);
+    isFirstChunk = true;
+
+    return status;
 }
 
 CloudStatus MeasurementStreamWebSocketJson::cancel(const CloudConfig& config)
@@ -318,9 +333,14 @@ void MeasurementStreamWebSocketJson::handleStreamResponse(const std::shared_ptr<
                 handleResult(result);
             }
 
-            chunksOutstanding--;
-            if (lastChunkSent && chunksOutstanding == 0) {
-                closeStream(); // All responses received, shut the stream down
+            {
+                const std::lock_guard<std::mutex> lock(mutexChunks);
+                chunksOutstanding--;
+                if (lastChunkSent && chunksOutstanding == 0) {
+                    cloudLog(CLOUD_LOG_LEVEL_DEBUG, "Last chunk sent and none outstanding, so closing the stream");
+
+                    closeStream(); // All responses received, shut the stream down
+                }
             }
         }
     }
